@@ -45,7 +45,7 @@ export function getActualDurationSec(session: ActiveSession, now: number): numbe
 
 export function getRemainingMs(session: ActiveSession, now: number): number {
   if (session.mode !== "target" || session.targetDuration == null) return 0;
-  return Math.max(0, session.targetDuration * 1000 - getElapsedMs(session, now));
+  return Math.max(0, session.targetDuration * 60 * 1000 - getElapsedMs(session, now));
 }
 
 export function getRemainingSec(session: ActiveSession, now: number): number {
@@ -58,7 +58,7 @@ export function getDerivedStatus(session: ActiveSession, now: number): ActiveSes
     session.status === "running" &&
     session.mode === "target" &&
     session.targetDuration != null &&
-    getElapsedMs(session, now) >= session.targetDuration * 1000
+    getElapsedMs(session, now) >= session.targetDuration * 60 * 1000
   ) {
     return "target_reached";
   }

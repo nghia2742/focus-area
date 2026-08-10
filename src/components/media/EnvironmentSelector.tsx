@@ -1,8 +1,9 @@
 "use client";
 
-import { CheckIcon, MusicIcon, VolumeXIcon, type LucideIcon } from "lucide-react";
+import { CheckIcon } from "lucide-react";
 import { ENVIRONMENTS } from "@/data/environments";
 import { getMusicTrack } from "@/data/music";
+import { EnvironmentThumb } from "@/components/media/EnvironmentThumb";
 import { cn } from "@/lib/utils";
 
 interface EnvironmentSelectorProps {
@@ -25,24 +26,21 @@ export function EnvironmentSelector({
       {ENVIRONMENTS.map((env) => {
         const selected = value === env.id;
         const track = env.musicId ? getMusicTrack(env.musicId) : undefined;
-        const Icon: LucideIcon = env.musicId ? MusicIcon : VolumeXIcon;
         return (
           <button
             key={env.id}
             type="button"
             onClick={() => onChange(env.id)}
             className={cn(
-              "flex items-center gap-3 rounded-xl border text-left transition-colors",
-              compact ? "px-3 py-2" : "px-3.5 py-3",
+              "flex items-center gap-3 rounded-2xl border text-left transition-all duration-200",
+              compact ? "px-3 py-2.5" : "px-3.5 py-3",
               selected
-                ? "border-accent-vivid bg-accent-vivid/10 text-foreground"
-                : "border-border bg-card hover:border-foreground/20",
+                ? "border-accent-vivid/50 bg-accent-vivid/10 text-foreground shadow-[0_0_0_1px_oklch(0.66_0.15_58/0.35)]"
+                : "border-border bg-card hover:border-foreground/25 hover:-translate-y-px",
             )}
             aria-pressed={selected}
           >
-            <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-muted">
-              <Icon className="size-4 text-muted-foreground" />
-            </span>
+            <EnvironmentThumb env={env} className="size-10 shrink-0 rounded-xl" />
             <span className="min-w-0 flex-1">
               <span className="block truncate text-sm font-medium">{env.name}</span>
               <span className="block truncate text-xs text-muted-foreground">

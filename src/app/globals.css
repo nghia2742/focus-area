@@ -50,74 +50,74 @@
 }
 
 :root {
-  --background: oklch(0.97 0.004 265);
-  --foreground: oklch(0.2 0.02 265);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.2 0.02 265);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.2 0.02 265);
-  --primary: oklch(0.2 0.02 265);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.94 0.01 265);
-  --secondary-foreground: oklch(0.2 0.02 265);
-  --muted: oklch(0.94 0.01 265);
-  --muted-foreground: oklch(0.5 0.02 265);
-  --accent: oklch(0.93 0.02 265);
-  --accent-foreground: oklch(0.2 0.02 265);
-  --accent-vivid: oklch(0.62 0.22 285);
+  --background: oklch(0.972 0.006 75);
+  --foreground: oklch(0.21 0.025 55);
+  --card: oklch(0.995 0.003 75);
+  --card-foreground: oklch(0.21 0.025 55);
+  --popover: oklch(0.995 0.003 75);
+  --popover-foreground: oklch(0.21 0.025 55);
+  --primary: oklch(0.72 0.14 62);
+  --primary-foreground: oklch(0.19 0.035 55);
+  --secondary: oklch(0.938 0.01 75);
+  --secondary-foreground: oklch(0.26 0.03 55);
+  --muted: oklch(0.94 0.01 75);
+  --muted-foreground: oklch(0.5 0.025 60);
+  --accent: oklch(0.925 0.035 70);
+  --accent-foreground: oklch(0.38 0.09 60);
+  --accent-vivid: oklch(0.66 0.15 58);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.89 0.01 265);
-  --input: oklch(0.89 0.01 265);
-  --ring: oklch(0.62 0.22 285);
-  --chart-1: oklch(0.62 0.22 285);
-  --chart-2: oklch(0.68 0.12 200);
-  --chart-3: oklch(0.68 0.12 340);
-  --chart-4: oklch(0.6 0.13 150);
-  --chart-5: oklch(0.64 0.14 45);
-  --radius: 0.7rem;
-  --sidebar: oklch(0.97 0.004 265);
-  --sidebar-foreground: oklch(0.2 0.02 265);
-  --sidebar-primary: oklch(0.2 0.02 265);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.93 0.02 265);
-  --sidebar-accent-foreground: oklch(0.2 0.02 265);
-  --sidebar-border: oklch(0.89 0.01 265);
-  --sidebar-ring: oklch(0.62 0.22 285);
+  --border: oklch(0.885 0.014 70);
+  --input: oklch(0.885 0.014 70);
+  --ring: oklch(0.66 0.15 58);
+  --chart-1: oklch(0.66 0.15 58);
+  --chart-2: oklch(0.7 0.12 42);
+  --chart-3: oklch(0.66 0.13 350);
+  --chart-4: oklch(0.63 0.09 155);
+  --chart-5: oklch(0.62 0.1 245);
+  --radius: 0.9rem;
+  --sidebar: oklch(0.972 0.006 75);
+  --sidebar-foreground: oklch(0.21 0.025 55);
+  --sidebar-primary: oklch(0.72 0.14 62);
+  --sidebar-primary-foreground: oklch(0.19 0.035 55);
+  --sidebar-accent: oklch(0.925 0.035 70);
+  --sidebar-accent-foreground: oklch(0.38 0.09 60);
+  --sidebar-border: oklch(0.885 0.014 70);
+  --sidebar-ring: oklch(0.66 0.15 58);
 }
 
 .dark {
-  --background: oklch(0.145 0.014 265);
-  --foreground: oklch(0.96 0.008 265);
-  --card: oklch(0.19 0.016 265);
-  --card-foreground: oklch(0.96 0.008 265);
-  --popover: oklch(0.19 0.016 265);
-  --popover-foreground: oklch(0.96 0.008 265);
-  --primary: oklch(0.94 0.01 265);
-  --primary-foreground: oklch(0.19 0.02 265);
-  --secondary: oklch(0.26 0.018 265);
-  --secondary-foreground: oklch(0.96 0.008 265);
-  --muted: oklch(0.26 0.018 265);
-  --muted-foreground: oklch(0.7 0.015 265);
-  --accent: oklch(0.28 0.04 285);
-  --accent-foreground: oklch(0.95 0.01 285);
-  --accent-vivid: oklch(0.68 0.21 285);
+  --background: oklch(0.155 0.013 60);
+  --foreground: oklch(0.95 0.012 70);
+  --card: oklch(0.195 0.015 60);
+  --card-foreground: oklch(0.95 0.012 70);
+  --popover: oklch(0.195 0.015 60);
+  --popover-foreground: oklch(0.95 0.012 70);
+  --primary: oklch(0.78 0.13 70);
+  --primary-foreground: oklch(0.2 0.035 55);
+  --secondary: oklch(0.245 0.016 60);
+  --secondary-foreground: oklch(0.95 0.012 70);
+  --muted: oklch(0.245 0.016 60);
+  --muted-foreground: oklch(0.7 0.02 65);
+  --accent: oklch(0.27 0.04 70);
+  --accent-foreground: oklch(0.93 0.04 70);
+  --accent-vivid: oklch(0.78 0.13 70);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 14%);
-  --ring: oklch(0.68 0.21 285);
-  --chart-1: oklch(0.68 0.21 285);
-  --chart-2: oklch(0.7 0.12 200);
-  --chart-3: oklch(0.7 0.13 340);
-  --chart-4: oklch(0.64 0.13 150);
-  --chart-5: oklch(0.68 0.14 45);
-  --sidebar: oklch(0.16 0.015 265);
-  --sidebar-foreground: oklch(0.96 0.008 265);
-  --sidebar-primary: oklch(0.68 0.21 285);
-  --sidebar-primary-foreground: oklch(0.98 0 0);
-  --sidebar-accent: oklch(0.26 0.018 265);
-  --sidebar-accent-foreground: oklch(0.96 0.008 265);
+  --ring: oklch(0.78 0.13 70);
+  --chart-1: oklch(0.78 0.13 70);
+  --chart-2: oklch(0.74 0.11 45);
+  --chart-3: oklch(0.72 0.12 350);
+  --chart-4: oklch(0.68 0.09 160);
+  --chart-5: oklch(0.68 0.1 250);
+  --sidebar: oklch(0.17 0.014 60);
+  --sidebar-foreground: oklch(0.95 0.012 70);
+  --sidebar-primary: oklch(0.78 0.13 70);
+  --sidebar-primary-foreground: oklch(0.2 0.035 55);
+  --sidebar-accent: oklch(0.27 0.04 70);
+  --sidebar-accent-foreground: oklch(0.93 0.04 70);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.68 0.21 285);
+  --sidebar-ring: oklch(0.78 0.13 70);
 }
 
 @layer base {
@@ -135,10 +135,45 @@
 /* Soft, rounded glass surfaces for the immersive screens. */
 @utility glass {
   @apply bg-white/5 backdrop-blur-xl border border-white/10;
+  box-shadow: inset 0 1px 0 oklch(1 0 0 / 6%);
+}
+
+@utility glass-deep {
+  @apply border border-white/10 bg-black/35 backdrop-blur-2xl;
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 8%),
+    0 24px 60px -24px oklch(0 0 0 / 0.6);
 }
 
 @utility text-glow {
   text-shadow: 0 0 24px rgb(255 255 255 / 0.18);
+}
+
+/* Warm ember glow for the timer digits on the immersive screen. */
+@utility ember-glow {
+  text-shadow:
+    0 0 24px oklch(0.78 0.13 70 / 0.28),
+    0 0 72px oklch(0.78 0.13 70 / 0.22);
+}
+
+/* Subtle film grain for the immersive surfaces. */
+@utility noise {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
+}
+
+/* Warm ambient glow behind the setup screen. */
+@utility ambient-glow {
+  background:
+    radial-gradient(
+      ellipse 60% 42% at 50% -8%,
+      oklch(0.78 0.13 70 / 0.14),
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 45% 36% at 88% 108%,
+      oklch(0.66 0.15 58 / 0.08),
+      transparent 70%
+    );
 }
 
 /* Timer display: geometric tabular figures so digits don't jitter. */

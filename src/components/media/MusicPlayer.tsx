@@ -30,8 +30,8 @@ export function MusicPlayer({
   if (error) {
     return (
       <div className={cn("glass flex items-center gap-2 rounded-full px-4 py-2", className)}>
-        <span className="text-sm text-muted-foreground">Music unavailable</span>
-        <Button variant="ghost" size="icon-sm" onClick={retry} aria-label="Retry music">
+        <span className="text-sm text-white/60">Music unavailable</span>
+        <Button variant="ghost" size="icon-sm" onClick={retry} aria-label="Retry music" className="text-white/80 hover:bg-white/10 hover:text-white">
           <RefreshCwIcon />
         </Button>
       </div>
@@ -44,7 +44,7 @@ export function MusicPlayer({
   return (
     <div
       className={cn(
-        "glass flex flex-wrap items-center justify-center gap-2 rounded-full px-3 py-2 sm:gap-3",
+        "glass flex flex-wrap items-center justify-center gap-1 rounded-full px-2.5 py-2 sm:gap-2",
         className,
       )}
     >
@@ -53,14 +53,17 @@ export function MusicPlayer({
         size="icon-sm"
         onClick={toggle}
         aria-label={isPlaying ? "Pause music" : "Play music"}
+        className="text-white/80 hover:bg-white/10 hover:text-white"
       >
         {isPlaying ? <PauseIcon /> : <PlayIcon />}
       </Button>
 
-      <span className="max-w-40 truncate text-sm font-medium sm:max-w-none">{label}</span>
+      <span className="max-w-40 truncate px-1 text-sm font-medium text-white/90 sm:max-w-none">
+        {label}
+      </span>
 
       <div className="hidden items-center gap-2 sm:flex">
-        <Volume2Icon className="size-4 text-muted-foreground" />
+        <Volume2Icon className="size-4 text-white/40" />
         <Slider
           aria-label="Music volume"
           className="w-24"
@@ -76,7 +79,13 @@ export function MusicPlayer({
       </div>
 
       {onOpenSelector && (
-        <Button variant="ghost" size="icon-sm" onClick={onOpenSelector} aria-label="Change environment">
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          onClick={onOpenSelector}
+          aria-label="Change environment"
+          className="text-white/80 hover:bg-white/10 hover:text-white"
+        >
           <ListMusicIcon />
         </Button>
       )}

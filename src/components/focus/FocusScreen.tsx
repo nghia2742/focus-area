@@ -144,14 +144,15 @@ export function FocusScreen({ onComplete }: FocusScreenProps) {
   };
 
   return (
-    <div className="relative flex-1 w-full overflow-hidden bg-background text-foreground">
+    <div className="relative flex-1 w-full overflow-hidden bg-[oklch(0.14_0.012_60)] text-[oklch(0.95_0.012_70)]">
       <BackgroundRenderer background={background} />
 
-      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-8 px-4 sm:gap-10">
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-10 px-4 sm:gap-12">
         {taskName && (
-          <h1 className="max-w-xl truncate text-base font-semibold text-foreground/90 sm:text-lg">
-            {taskName}
-          </h1>
+          <span className="glass inline-flex max-w-md items-center gap-2 rounded-full px-4 py-1.5 text-sm text-white/90">
+            <span className="size-1.5 shrink-0 rounded-full bg-accent-vivid" />
+            <span className="truncate">{taskName}</span>
+          </span>
         )}
 
         <TimerDisplay />
@@ -166,14 +167,13 @@ export function FocusScreen({ onComplete }: FocusScreenProps) {
             <MusicPlayer
               onOpenSelector={() => setShowTrackPicker(true)}
               onVolumeChange={(v) => updateVolume(v)}
-              className="rounded-full"
             />
             <div className="flex items-center gap-3">
               {(status === "running" || status === "paused") && (
                 <Button
-                  variant="secondary"
+                  variant="ghost"
                   size="lg"
-                  className="glass rounded-full px-8"
+                  className="glass h-12 rounded-full px-7 text-white/90 hover:bg-white/10 hover:text-white active:scale-[0.98]"
                   onClick={() => (isPaused ? resume() : pause())}
                 >
                   {isPaused ? (
@@ -192,7 +192,7 @@ export function FocusScreen({ onComplete }: FocusScreenProps) {
               <Button
                 variant="ghost"
                 size="lg"
-                className="rounded-full text-muted-foreground hover:text-foreground"
+                className="h-12 rounded-full px-6 text-white/45 hover:bg-white/10 hover:text-white active:scale-[0.98]"
                 onClick={() => setShowEndConfirm(true)}
               >
                 <SquareIcon data-icon="inline-start" />

@@ -48,6 +48,7 @@ export interface DayBucket {
   day: number;
   label: string;
   seconds: number;
+  isToday: boolean;
 }
 
 /** Trailing `n` calendar days ending today, oldest first. */
@@ -57,7 +58,12 @@ export function lastNDays(n: number, sessions: FocusSession[], now: number): Day
 
   for (let i = n - 1; i >= 0; i--) {
     const day = todayStart - i * 86_400_000;
-    buckets.push({ day, label: formatDayShort(new Date(day)), seconds: 0 });
+    buckets.push({
+      day,
+      label: formatDayShort(new Date(day)),
+      seconds: 0,
+      isToday: day === todayStart,
+    });
   }
 
   for (const s of sessions) {

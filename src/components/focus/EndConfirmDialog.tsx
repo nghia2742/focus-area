@@ -40,10 +40,12 @@ export function EndConfirmDialog({
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="secondary" onClick={onKeepFocusing}>
+          <Button variant="secondary" className="rounded-full" onClick={onKeepFocusing}>
             Keep Focusing
           </Button>
-          <Button onClick={onEndSession}>End Session</Button>
+          <Button className="rounded-full" onClick={onEndSession}>
+            End Session
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

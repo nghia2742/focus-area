@@ -37,16 +37,16 @@ export function BackgroundRenderer({
           muted
           loop
           playsInline
-          poster={background.thumbnailUrl ?? background.assetUrl}
+          poster={background.thumbnailUrl}
           onError={() => setVideoFailed(true)}
         >
           <source src={background.assetUrl} />
         </video>
-      ) : background ? (
+      ) : background?.thumbnailUrl ? (
         // eslint-disable-next-line @next/next/no-img-element -- decorative full-bleed background
         <img
           key={background.id}
-          src={background.assetUrl}
+          src={background.thumbnailUrl}
           alt=""
           draggable={false}
           className="h-full w-full object-cover"
@@ -54,10 +54,11 @@ export function BackgroundRenderer({
       ) : null}
       <div
         className={cn(
-          "absolute inset-0 bg-gradient-to-b from-black/40 via-black/25 to-black/60",
+          "absolute inset-0 bg-gradient-to-b from-black/45 via-black/30 to-black/65",
           overlayClassName,
         )}
       />
+      <div className="noise absolute inset-0 opacity-[0.06] mix-blend-overlay" aria-hidden />
     </div>
   );
 }

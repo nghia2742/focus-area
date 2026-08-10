@@ -16,7 +16,7 @@ export function SessionItem({ session, now }: SessionItemProps) {
       : "Open";
 
   return (
-    <li className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card px-4 py-3">
+    <li className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-card px-4 py-3 transition-colors hover:border-foreground/15">
       <div className="flex min-w-0 flex-col gap-1">
         <span className="truncate text-sm font-medium">{session.taskName}</span>
         <span className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -26,7 +26,7 @@ export function SessionItem({ session, now }: SessionItemProps) {
           </span>
         </span>
       </div>
-      <span className="font-tabular shrink-0 text-sm font-semibold">
+      <span className="font-tabular shrink-0 rounded-full bg-muted px-3 py-1 text-xs font-semibold">
         {formatDurationCompact(session.actualDuration)}
       </span>
     </li>

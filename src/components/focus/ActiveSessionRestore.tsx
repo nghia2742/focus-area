@@ -49,10 +49,12 @@ export function ActiveSessionRestore({
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="secondary" onClick={onEnd}>
+          <Button variant="secondary" className="rounded-full" onClick={onEnd}>
             End Session
           </Button>
-          <Button onClick={onResume}>Resume Session</Button>
+          <Button className="rounded-full" onClick={onResume}>
+            Resume Session
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

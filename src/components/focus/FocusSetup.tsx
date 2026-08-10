@@ -1,14 +1,25 @@
 "use client";
 
 import { useState } from "react";
-import { MusicIcon, PlayIcon, TimerIcon, TimerOffIcon, VolumeXIcon } from "lucide-react";
+import {
+  CheckIcon,
+  MusicIcon,
+  PlayIcon,
+  TimerIcon,
+  TimerOffIcon,
+  VolumeXIcon,
+  type LucideIcon,
+} from "lucide-react";
 import type { FocusMode } from "@/types/focus";
 import { FOCUS_DURATION_PRESETS } from "@/types/focus";
 import { ENVIRONMENTS, getEnvironment } from "@/data/environments";
+import { getMusicTrack } from "@/data/music";
+import { EnvironmentThumb } from "@/components/media/EnvironmentThumb";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useFocusStore } from "@/store/focusStore";
 import { musicPlayer } from "@/lib/audio/musicPlayer";
 import { requestNotificationPermission } from "@/lib/notifications";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Field,
@@ -18,7 +29,6 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type DurationChoice = "25" | "50" | "90" | "custom";
@@ -113,140 +123,181 @@ function SetupForm() {
     durationChoice === "custom" && mode === "target" && resolvedDuration() == null;
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-5 py-10 sm:py-14">
-      <div className="flex flex-col gap-1.5">
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-          What are you working on?
-        </h1>
-        <p className="text-sm text-muted-foreground">One thing. Right now.</p>
-      </div>
+    <div className="relative flex flex-1 flex-col">
+      <div className="ambient-glow pointer-events-none absolute inset-0" aria-hidden />
 
-      <FieldGroup>
-        <Field>
-          <FieldLabel htmlFor="task-name">Task (optional)</FieldLabel>
-          <Input
-            id="task-name"
-            value={taskName}
-            onChange={(e) => setTaskName(e.target.value)}
-            placeholder="e.g. Learn PostgreSQL"
-            autoComplete="off"
-          />
-        </Field>
-      </FieldGroup>
+      <div className="relative mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center gap-8 px-4 py-14 sm:gap-10">
+        <div className="flex flex-col gap-2.5">
+          <h1 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
+            What are you working on?
+          </h1>
+          <p className="max-w-md text-[0.95rem] text-muted-foreground">
+            Set an intention, then disappear into it.
+          </p>
+        </div>
 
-      <div className="flex flex-col gap-2">
-        <span className="text-sm font-medium">Mode</span>
-        <ToggleGroup
-          type="single"
-          value={mode}
-          onValueChange={(v) => {
-            if (v) {
-              setMode(v as FocusMode);
-              setDurationError(null);
-            }
-          }}
-          variant="outline"
-          className="w-full"
-        >
-          <ToggleGroupItem value="open" className="flex-1 gap-2">
-            <TimerOffIcon />
-            <span>Open Focus</span>
-          </ToggleGroupItem>
-          <ToggleGroupItem value="target" className="flex-1 gap-2">
-            <TimerIcon />
-            <span>Target Focus</span>
-          </ToggleGroupItem>
-        </ToggleGroup>
-      </div>
+        <FieldGroup className="gap-8">
+          <Field>
+            <FieldLabel htmlFor="task-name">Task (optional)</FieldLabel>
+            <Input
+              id="task-name"
+              value={taskName}
+              onChange={(e) => setTaskName(e.target.value)}
+              placeholder="e.g. Learn PostgreSQL"
+              autoComplete="off"
+              className="h-12 rounded-2xl px-4 text-base shadow-[inset_0_1px_0_oklch(1_0_0/0.4)] md:text-base"
+            />
+          </Field>
 
-      {mode === "target" && (
-        <div className="flex flex-col gap-2">
-          <span className="text-sm font-medium">Duration</span>
-          <ToggleGroup
-            type="single"
-            value={durationChoice}
-            onValueChange={(v) => {
-              if (v) setDurationChoice(v as DurationChoice);
-              setDurationError(null);
-            }}
-            variant="outline"
-            className="w-full"
-          >
-            {FOCUS_DURATION_PRESETS.map((d) => (
-              <ToggleGroupItem key={d} value={String(d)} className="flex-1">
-                {d}
+          <div className="flex flex-col gap-3">
+            <span className="text-sm font-medium">Mode</span>
+            <ToggleGroup
+              type="single"
+              value={mode}
+              onValueChange={(v) => {
+                if (v) {
+                  setMode(v as FocusMode);
+                  setDurationError(null);
+                }
+              }}
+              variant="outline"
+              className="w-full"
+            >
+              <ToggleGroupItem value="open" className="flex-1 gap-2 rounded-xl py-2.5">
+                <TimerOffIcon />
+                <span>Open Focus</span>
               </ToggleGroupItem>
-            ))}
-            <ToggleGroupItem value="custom" className="flex-1">
-              Custom
-            </ToggleGroupItem>
-          </ToggleGroup>
-          {durationChoice === "custom" && (
-            <Field data-invalid={customInvalid || undefined}>
-              <FieldLabel htmlFor="custom-duration">Custom duration (minutes)</FieldLabel>
-              <Input
-                id="custom-duration"
-                type="number"
-                min={1}
-                max={600}
-                inputMode="numeric"
-                value={customMinutes}
-                onChange={(e) => {
-                  setCustomMinutes(e.target.value);
+              <ToggleGroupItem value="target" className="flex-1 gap-2 rounded-xl py-2.5">
+                <TimerIcon />
+                <span>Target Focus</span>
+              </ToggleGroupItem>
+            </ToggleGroup>
+          </div>
+
+          {mode === "target" && (
+            <div className="flex flex-col gap-3">
+              <span className="text-sm font-medium">Duration</span>
+              <ToggleGroup
+                type="single"
+                value={durationChoice}
+                onValueChange={(v) => {
+                  if (v) setDurationChoice(v as DurationChoice);
                   setDurationError(null);
                 }}
-                placeholder="e.g. 45"
-                aria-invalid={customInvalid || undefined}
-              />
-              {customInvalid && (
-                <FieldDescription>Enter a duration between 1 and 600 minutes.</FieldDescription>
+                variant="outline"
+                className="w-full"
+              >
+                {FOCUS_DURATION_PRESETS.map((d) => (
+                  <ToggleGroupItem key={d} value={String(d)} className="flex-1 rounded-xl py-2.5">
+                    {d}m
+                  </ToggleGroupItem>
+                ))}
+                <ToggleGroupItem value="custom" className="flex-1 rounded-xl py-2.5">
+                  Custom
+                </ToggleGroupItem>
+              </ToggleGroup>
+              {durationChoice === "custom" && (
+                <Field data-invalid={customInvalid || undefined}>
+                  <FieldLabel htmlFor="custom-duration">Custom duration (minutes)</FieldLabel>
+                  <Input
+                    id="custom-duration"
+                    type="number"
+                    min={1}
+                    max={600}
+                    inputMode="numeric"
+                    value={customMinutes}
+                    onChange={(e) => {
+                      setCustomMinutes(e.target.value);
+                      setDurationError(null);
+                    }}
+                    placeholder="e.g. 45"
+                    aria-invalid={customInvalid || undefined}
+                    className="h-12 rounded-2xl px-4 text-base md:text-base"
+                  />
+                  {customInvalid && (
+                    <FieldDescription>
+                      Enter a duration between 1 and 600 minutes.
+                    </FieldDescription>
+                  )}
+                </Field>
               )}
-            </Field>
+              {durationError && !customInvalid && (
+                <p className="text-sm text-destructive" role="alert">
+                  {durationError}
+                </p>
+              )}
+            </div>
           )}
-          {durationError && !customInvalid && (
-            <p className="text-sm text-destructive" role="alert">
-              {durationError}
-            </p>
-          )}
+        </FieldGroup>
+
+        <div className="flex flex-col gap-3">
+          <span className="text-sm font-medium">Environment</span>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {ENVIRONMENTS.map((env) => {
+              const selected = environmentId === env.id;
+              const Icon: LucideIcon = env.musicId ? MusicIcon : VolumeXIcon;
+              const track = env.musicId ? getMusicTrack(env.musicId) : undefined;
+              return (
+                <button
+                  key={env.id}
+                  type="button"
+                  onClick={() => setEnvironmentId(env.id)}
+                  className={cn(
+                    "group flex flex-col overflow-hidden rounded-2xl border text-left outline-none transition-all duration-300 focus-visible:ring-2 focus-visible:ring-ring",
+                    selected
+                      ? "border-accent-vivid/50 bg-accent-vivid/5 shadow-[0_0_0_1px_oklch(0.66_0.15_58/0.45)]"
+                      : "border-border bg-card hover:-translate-y-0.5 hover:border-foreground/20 hover:shadow-[0_16px_40px_-20px_oklch(0.19_0.03_55/0.45)]",
+                  )}
+                  aria-pressed={selected}
+                >
+                  <span className="relative">
+                    <EnvironmentThumb env={env} className="aspect-[16/10] w-full" />
+                    {selected && (
+                      <span className="absolute top-2.5 right-2.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-accent-vivid text-primary-foreground shadow-[0_4px_12px_-2px_oklch(0.19_0.03_55/0.5)]">
+                        <CheckIcon className="size-3.5" />
+                      </span>
+                    )}
+                  </span>
+                  <span className="flex items-center justify-between gap-3 p-4">
+                    <span className="flex min-w-0 items-center gap-3">
+                      <span
+                        className={cn(
+                          "flex size-9 shrink-0 items-center justify-center rounded-xl transition-colors",
+                          selected
+                            ? "bg-accent-vivid/15 text-accent-vivid"
+                            : "bg-muted text-muted-foreground",
+                        )}
+                      >
+                        <Icon className="size-4" />
+                      </span>
+                      <span className="flex min-w-0 flex-col">
+                        <span className="truncate text-sm font-medium">{env.name}</span>
+                        <span className="truncate text-xs text-muted-foreground">
+                          {track ? track.name : "No music"}
+                        </span>
+                      </span>
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Music and background always come as a pair.
+          </p>
         </div>
-      )}
 
-      <Separator className="my-1" />
-
-      <div className="flex flex-col gap-2">
-        <span className="text-sm font-medium">Environment</span>
-        <ToggleGroup
-          type="single"
-          value={environmentId ?? ""}
-          onValueChange={(v) => {
-            if (v) setEnvironmentId(v);
-          }}
-          variant="outline"
-          className="w-full"
+        <Button
+          size="lg"
+          className="group/start h-14 w-full rounded-full px-3 text-base font-semibold shadow-[0_16px_48px_-16px_oklch(0.66_0.15_58/0.7)]"
+          onClick={handleStart}
         >
-          {ENVIRONMENTS.map((env) => {
-            const Icon = env.musicId ? MusicIcon : VolumeXIcon;
-            return (
-              <ToggleGroupItem key={env.id} value={env.id} className="flex-1 gap-2">
-                <Icon />
-                <span>{env.name}</span>
-              </ToggleGroupItem>
-            );
-          })}
-        </ToggleGroup>
-        <p className="text-xs text-muted-foreground">
-          Music and background always come as a pair.
-        </p>
+          <span className="flex-1 text-center">Start Focus</span>
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary-foreground/15 transition-transform duration-300 group-hover/start:translate-x-0.5 group-hover/start:scale-105 group-active/start:scale-95">
+            <PlayIcon className="size-4 fill-current" />
+          </span>
+        </Button>
       </div>
-
-      <Button
-        size="lg"
-        className="mt-2 h-11 w-full rounded-xl text-base font-semibold"
-        onClick={handleStart}
-      >
-        <PlayIcon data-icon="inline-start" />
-        Start Focus
-      </Button>
     </div>
   );
 }

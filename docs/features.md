@@ -4,12 +4,12 @@ Everything described here is implemented and lives in the single `/` route. Hist
 
 ## 1. Setup form (`FocusSetup`)
 
-Shown on `/` whenever no session is active.
+Shown on `/` whenever no session is active, over a full-bleed `main_bg.png` artwork (warm lo-fi study room) with a theme-aware warm scrim; the floating header pill sits above it.
 
 - **Task (optional)** — free-text input, attached to the session. Empty → default label `Focus Session`.
 - **Mode** — toggle: *Open Focus* (counts up) or *Target Focus* (counts down from a target).
 - **Duration** (Target only) — presets `25 / 50 / 90` or **Custom** (1–600 minutes, numeric input). Validation rejects out-of-range values with an inline error; custom mode can't be started invalid.
-- **Environment** — compact toggle pills of the available atmospheres (see [Environments](#5-environments)). Picking one sets both music and background. Hint text: *"Music and background always come as a pair."*
+- **Environment** — cards in a 2-column wrap grid (scales as environments are added), each showing the paired background's static thumbnail (`aspect 16:10`) with the music/name row below and the selected check badge on the thumbnail corner. Hint text: *"Music and background always come as a pair."*
 - **Start Focus** — creates the session, remembers the last environment if enabled, kicks off audio inside the click gesture, and best-effort requests notification permission.
 
 The form mounts with persisted settings as initial state (`useState` lazy initializers) — it is rendered only after the settings store is hydrated (Skeleton while waiting).
@@ -40,10 +40,10 @@ The immersive timer screen shown while a session is active.
 
 | Environment | Music | Background |
 | --- | --- | --- |
-| `quiet` | none | none (default bg) |
-| `late-night-study` | Late Night Study (Ambient) — `public/music/late-night-study.mp3` | Cat Studying — `public/backgrounds/cat-studying.mp4` |
+| `quiet` | none | none (neutral gradient placeholder) |
+| `late-night-study` | Late Night Study (Ambient) — `public/music/late-night-study.mp3` | Cat Studying — `public/backgrounds/cat-studying.mp4` (+ `cat-studying.jpg` poster/thumbnail) |
 
-Selection always applies the pair. During a session, "Change environment" swaps music + background live and records the new ids on the session.
+Selection always applies the pair. During a session, "Change environment" swaps music + background live and records the new ids on the session. Cards/rows render the background's `thumbnailUrl` via `getEnvironmentVisual`; missing thumbnails fall back to a mood-derived gradient.
 
 ## 5. History (`HistoryDialog`)
 
@@ -76,4 +76,4 @@ All local, via zustand `persist` → `localStorage`:
 ## 9. Responsive & accessibility
 
 - Desktop-first; the session UI works on mobile (controls wrap, volume slider hidden on small screens).
-- Keyboard-navigable with visible focus rings; `aria` labels on icon buttons; `prefers-reduced-motion` swaps video backgrounds for their static poster; tabular numerals prevent timer jitter.
+- Keyboard-navigable with visible focus rings; `aria` labels on icon buttons; `prefers-reduced-motion` swaps video backgrounds for their static poster (`thumbnailUrl`); tabular numerals prevent timer jitter.

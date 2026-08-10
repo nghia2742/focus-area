@@ -11,7 +11,7 @@ export interface FocusSession {
   id: string;
   taskName: string;
   mode: FocusMode;
-  /** Target duration in seconds (target mode only). */
+  /** Target duration in minutes (target mode only). */
   targetDuration?: number;
   /** Actual focused duration in seconds (pauses excluded). */
   actualDuration: number;
@@ -34,6 +34,7 @@ export interface ActiveSession {
   id: string;
   taskName: string;
   mode: FocusMode;
+  /** Target duration in minutes (target mode only). */
   targetDuration?: number;
   status: ActiveSessionStatus;
   /** Epoch ms when the session started. */
