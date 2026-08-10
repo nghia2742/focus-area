@@ -1,0 +1,40 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - link "Focus" [ref=e5] [cursor=pointer]:
+          - /url: /
+        - navigation "Primary" [ref=e10]:
+          - button "History" [ref=e11]
+          - button "Settings" [ref=e12]
+    - main [ref=e13]:
+      - generic [ref=e29]:
+        - generic [ref=e30]:
+          - heading "What are you working on?" [level=1] [ref=e31]
+          - paragraph [ref=e32]: One thing. Right now.
+        - group [ref=e34]:
+          - generic [ref=e35]: Task (optional)
+          - textbox "Task (optional)" [ref=e36]:
+            - /placeholder: e.g. Learn PostgreSQL
+        - generic [ref=e37]:
+          - generic [ref=e38]: Mode
+          - radiogroup [ref=e39]:
+            - radio "Open Focus" [ref=e40]
+            - radio "Target Focus" [checked] [ref=e42]
+        - generic [ref=e44]:
+          - generic [ref=e45]: Duration
+          - radiogroup [ref=e46]:
+            - radio "25" [ref=e47]
+            - radio "50" [checked] [ref=e48]
+            - radio "90" [ref=e49]
+            - radio "Custom" [ref=e50]
+        - generic [ref=e51]:
+          - generic [ref=e52]: Environment
+          - radiogroup [ref=e53]:
+            - radio "Quiet" [ref=e54]
+            - radio "Late Night Study" [checked] [active] [ref=e56]
+          - paragraph [ref=e58]: Music and background always come as a pair.
+        - button "Start Focus" [ref=e59]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e25] [cursor=pointer]
+  - alert [ref=e60]
