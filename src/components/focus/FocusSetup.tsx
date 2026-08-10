@@ -1,47 +1,55 @@
 "use client";
 
 import { useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import {
-  CheckIcon,
-  MusicIcon,
+  LayoutGridIcon,
   PlayIcon,
   TimerIcon,
   TimerOffIcon,
-  VolumeXIcon,
-  type LucideIcon,
 } from "lucide-react";
-import type { FocusMode } from "@/types/focus";
+import type { Environment, FocusMode } from "@/types/focus";
 import { FOCUS_DURATION_PRESETS } from "@/types/focus";
 import { ENVIRONMENTS, getEnvironment } from "@/data/environments";
-import { getMusicTrack } from "@/data/music";
 import { EnvironmentThumb } from "@/components/media/EnvironmentThumb";
+import { EnvironmentBrowseSheet } from "@/components/media/EnvironmentBrowseSheet";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useFocusStore } from "@/store/focusStore";
 import { musicPlayer } from "@/lib/audio/musicPlayer";
 import { requestNotificationPermission } from "@/lib/notifications";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Field,
-  FieldDescription,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 type DurationChoice = "25" | "50" | "90" | "custom";
 
+/** Dark-surface styling shared by the mode/duration toggle segments. */
+const darkToggleItem =
+  "flex-1 gap-2 rounded-full border-white/12 bg-white/6 py-2 text-white/70 hover:bg-white/10 hover:text-white data-[state=on]:border-accent-orange data-[state=on]:bg-accent-orange/15 data-[state=on]:text-accent-orange [&_svg]:opacity-60 data-[state=on]:[&_svg]:opacity-100";
+
+/** Dark-surface styling shared by text/number inputs on the glass card. */
+const darkInput =
+  "h-11 rounded-full border-white/12 bg-white/6 px-5 text-base text-white placeholder:text-white/40 shadow-none focus-visible:border-accent-orange focus-visible:ring-3 focus-visible:ring-accent-orange/30 focus-visible:bg-white/9 md:text-base";
+
 function SkeletonCard() {
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-5 py-12">
-      <Skeleton className="h-9 w-48" />
-      <Skeleton className="h-10 w-full rounded-xl" />
-      <Skeleton className="h-10 w-full rounded-xl" />
-      <Skeleton className="h-40 w-full rounded-2xl" />
-      <Skeleton className="h-32 w-full rounded-2xl" />
-      <Skeleton className="h-11 w-full rounded-xl" />
+    <div className="mx-auto flex min-h-0 w-full max-w-[560px] flex-1 flex-col justify-center px-4 sm:px-6">
+      <div className="glass-card my-4 flex w-full flex-col rounded-2xl p-5 sm:my-6 sm:rounded-3xl sm:p-6">
+        <div className="flex flex-col gap-5">
+          <Skeleton className="h-11 w-full rounded-full" />
+          <Skeleton className="h-11 w-full rounded-full" />
+          <Skeleton className="h-11 w-full rounded-full" />
+          <Skeleton className="h-40 w-full rounded-2xl" />
+          <Skeleton className="h-14 w-full rounded-full" />
+        </div>
+      </div>
     </div>
   );
 }
@@ -71,9 +79,12 @@ function SetupForm() {
       : String(settings.defaultDuration),
   );
   const [durationError, setDurationError] = useState<string | null>(null);
-  const [environmentId, setEnvironmentId] = useState<string | undefined>(
-    settings.rememberLastEnvironment ? settings.lastEnvironmentId : undefined,
+  const [environmentId, setEnvironmentId] = useState<string>(
+    settings.rememberLastEnvironment && settings.lastEnvironmentId
+      ? settings.lastEnvironmentId
+      : ENVIRONMENTS[0].id,
   );
+  const [browseOpen, setBrowseOpen] = useState(false);
 
   const resolvedDuration = (): number | null => {
     if (mode !== "target") return null;
@@ -96,9 +107,9 @@ function SetupForm() {
       targetDuration = d;
     }
 
-    const environment = getEnvironment(environmentId);
-    const musicId = environment?.musicId;
-    const backgroundId = environment?.backgroundId;
+    const environment = getEnvironment(environmentId) ?? ENVIRONMENTS[0];
+    const musicId = environment.musicId;
+    const backgroundId = environment.backgroundId;
 
     startSession({
       taskName,
@@ -109,7 +120,7 @@ function SetupForm() {
     });
 
     // Remember the last atmosphere if the user wants to.
-    if (settings.rememberLastEnvironment) update({ lastEnvironmentId: environmentId });
+    if (settings.rememberLastEnvironment) update({ lastEnvironmentId: environment.id });
 
     // Kick off audio inside the click gesture to satisfy autoplay rules.
     musicPlayer.setVolume(settings.musicVolume);
@@ -122,182 +133,249 @@ function SetupForm() {
   const customInvalid =
     durationChoice === "custom" && mode === "target" && resolvedDuration() == null;
 
+  const env = getEnvironment(environmentId) ?? ENVIRONMENTS[0];
+
   return (
-    <div className="relative flex flex-1 flex-col">
-      <div className="ambient-glow pointer-events-none absolute inset-0" aria-hidden />
-
-      <div className="relative mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center gap-8 px-4 py-14 sm:gap-10">
-        <div className="flex flex-col gap-2.5">
-          <h1 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
-            What are you working on?
-          </h1>
-          <p className="max-w-md text-[0.95rem] text-muted-foreground">
-            Set an intention, then disappear into it.
-          </p>
-        </div>
-
-        <FieldGroup className="gap-8">
-          <Field>
-            <FieldLabel htmlFor="task-name">Task (optional)</FieldLabel>
-            <Input
-              id="task-name"
-              value={taskName}
-              onChange={(e) => setTaskName(e.target.value)}
-              placeholder="e.g. Learn PostgreSQL"
-              autoComplete="off"
-              className="h-12 rounded-2xl px-4 text-base shadow-[inset_0_1px_0_oklch(1_0_0/0.4)] md:text-base"
-            />
-          </Field>
-
-          <div className="flex flex-col gap-3">
-            <span className="text-sm font-medium">Mode</span>
-            <ToggleGroup
-              type="single"
-              value={mode}
-              onValueChange={(v) => {
-                if (v) {
-                  setMode(v as FocusMode);
-                  setDurationError(null);
-                }
-              }}
-              variant="outline"
-              className="w-full"
-            >
-              <ToggleGroupItem value="open" className="flex-1 gap-2 rounded-xl py-2.5">
-                <TimerOffIcon />
-                <span>Open Focus</span>
-              </ToggleGroupItem>
-              <ToggleGroupItem value="target" className="flex-1 gap-2 rounded-xl py-2.5">
-                <TimerIcon />
-                <span>Target Focus</span>
-              </ToggleGroupItem>
-            </ToggleGroup>
+    <div className="relative flex min-h-0 flex-1 flex-col">
+      <div className="relative mx-auto flex min-h-0 w-full max-w-[560px] flex-1 flex-col justify-center px-4 sm:px-6">
+        <motion.div
+          initial={{ scale: 0.97, opacity: 0.7 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 380, damping: 28 }}
+          className="glass-card my-4 flex min-h-0 max-h-[680px] w-full flex-1 flex-col overflow-y-auto rounded-2xl p-5 sm:my-6 sm:rounded-3xl sm:p-6"
+        >
+          <div className="mb-6 flex shrink-0 flex-col gap-2">
+            <h1 className="text-2xl leading-tight font-bold tracking-tight text-white">
+              What are you working on?
+            </h1>
+            <p className="text-[15px] text-white/68">
+              Set an intention, then disappear into it.
+            </p>
           </div>
 
-          {mode === "target" && (
+          <FieldGroup className="shrink-0 gap-5">
+            <Field>
+              <FieldLabel htmlFor="task-name" className="text-white">
+                Task (optional)
+              </FieldLabel>
+              <Input
+                id="task-name"
+                value={taskName}
+                onChange={(e) => setTaskName(e.target.value)}
+                placeholder="e.g. Learn PostgreSQL"
+                autoComplete="off"
+                className={darkInput}
+              />
+            </Field>
+
             <div className="flex flex-col gap-3">
-              <span className="text-sm font-medium">Duration</span>
+              <span className="text-sm font-semibold text-white">Mode</span>
               <ToggleGroup
                 type="single"
-                value={durationChoice}
+                value={mode}
                 onValueChange={(v) => {
-                  if (v) setDurationChoice(v as DurationChoice);
-                  setDurationError(null);
+                  if (v) {
+                    setMode(v as FocusMode);
+                    setDurationError(null);
+                  }
                 }}
-                variant="outline"
+                spacing={3}
                 className="w-full"
               >
-                {FOCUS_DURATION_PRESETS.map((d) => (
-                  <ToggleGroupItem key={d} value={String(d)} className="flex-1 rounded-xl py-2.5">
-                    {d}m
-                  </ToggleGroupItem>
-                ))}
-                <ToggleGroupItem value="custom" className="flex-1 rounded-xl py-2.5">
-                  Custom
+                <ToggleGroupItem value="open" className={darkToggleItem}>
+                  <TimerOffIcon />
+                  <span>Open Focus</span>
+                </ToggleGroupItem>
+                <ToggleGroupItem value="target" className={darkToggleItem}>
+                  <TimerIcon />
+                  <span>Target Focus</span>
                 </ToggleGroupItem>
               </ToggleGroup>
-              {durationChoice === "custom" && (
-                <Field data-invalid={customInvalid || undefined}>
-                  <FieldLabel htmlFor="custom-duration">Custom duration (minutes)</FieldLabel>
-                  <Input
-                    id="custom-duration"
-                    type="number"
-                    min={1}
-                    max={600}
-                    inputMode="numeric"
-                    value={customMinutes}
-                    onChange={(e) => {
-                      setCustomMinutes(e.target.value);
-                      setDurationError(null);
-                    }}
-                    placeholder="e.g. 45"
-                    aria-invalid={customInvalid || undefined}
-                    className="h-12 rounded-2xl px-4 text-base md:text-base"
-                  />
-                  {customInvalid && (
-                    <FieldDescription>
-                      Enter a duration between 1 and 600 minutes.
-                    </FieldDescription>
-                  )}
-                </Field>
-              )}
-              {durationError && !customInvalid && (
-                <p className="text-sm text-destructive" role="alert">
-                  {durationError}
-                </p>
-              )}
             </div>
-          )}
-        </FieldGroup>
+          </FieldGroup>
 
-        <div className="flex flex-col gap-3">
-          <span className="text-sm font-medium">Environment</span>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {ENVIRONMENTS.map((env) => {
-              const selected = environmentId === env.id;
-              const Icon: LucideIcon = env.musicId ? MusicIcon : VolumeXIcon;
-              const track = env.musicId ? getMusicTrack(env.musicId) : undefined;
-              return (
-                <button
-                  key={env.id}
-                  type="button"
-                  onClick={() => setEnvironmentId(env.id)}
-                  className={cn(
-                    "group flex flex-col overflow-hidden rounded-2xl border text-left outline-none transition-all duration-300 focus-visible:ring-2 focus-visible:ring-ring",
-                    selected
-                      ? "border-accent-vivid/50 bg-accent-vivid/5 shadow-[0_0_0_1px_oklch(0.66_0.15_58/0.45)]"
-                      : "border-border bg-card hover:-translate-y-0.5 hover:border-foreground/20 hover:shadow-[0_16px_40px_-20px_oklch(0.19_0.03_55/0.45)]",
-                  )}
-                  aria-pressed={selected}
-                >
-                  <span className="relative">
-                    <EnvironmentThumb env={env} className="aspect-[16/10] w-full" />
-                    {selected && (
-                      <span className="absolute top-2.5 right-2.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-accent-vivid text-primary-foreground shadow-[0_4px_12px_-2px_oklch(0.19_0.03_55/0.5)]">
-                        <CheckIcon className="size-3.5" />
-                      </span>
-                    )}
-                  </span>
-                  <span className="flex items-center justify-between gap-3 p-4">
-                    <span className="flex min-w-0 items-center gap-3">
+          <AnimatePresence initial={false}>
+            {mode === "target" && (
+              <motion.div
+                key="duration-section"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.25, ease: "easeInOut" }}
+                className="shrink-0 overflow-hidden"
+              >
+                <div className="flex flex-col gap-3 pt-5">
+                  <span className="text-sm font-semibold text-white">Duration</span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <ToggleGroup
+                      type="single"
+                      value={
+                        FOCUS_DURATION_PRESETS.includes(Number(durationChoice))
+                          ? durationChoice
+                          : ""
+                      }
+                      onValueChange={(v) => {
+                        if (v) setDurationChoice(v as DurationChoice);
+                        setDurationError(null);
+                      }}
+                      spacing={2}
+                      className="min-w-0 flex-1"
+                    >
+                      {FOCUS_DURATION_PRESETS.map((d) => (
+                        <ToggleGroupItem key={d} value={String(d)} className={darkToggleItem}>
+                          {d}m
+                        </ToggleGroupItem>
+                      ))}
+                    </ToggleGroup>
+
+                    <div
+                      className={cn(
+                        "flex h-8 min-w-[150px] items-center gap-1.5 rounded-full border bg-white/6 pr-4 pl-4 transition-colors focus-within:ring-3",
+                        customInvalid
+                          ? "border-red-400/70 focus-within:border-red-400/70 focus-within:ring-red-400/30"
+                          : durationChoice === "custom"
+                            ? "border-accent-orange bg-accent-orange/15 focus-within:border-accent-orange focus-within:ring-accent-orange/30"
+                            : "border-white/12 focus-within:border-accent-orange focus-within:ring-accent-orange/30",
+                      )}
+                    >
                       <span
                         className={cn(
-                          "flex size-9 shrink-0 items-center justify-center rounded-xl transition-colors",
-                          selected
-                            ? "bg-accent-vivid/15 text-accent-vivid"
-                            : "bg-muted text-muted-foreground",
+                          "text-sm font-semibold whitespace-nowrap",
+                          durationChoice === "custom" ? "text-accent-orange" : "text-white/70",
                         )}
                       >
-                        <Icon className="size-4" />
+                        Custom
                       </span>
-                      <span className="flex min-w-0 flex-col">
-                        <span className="truncate text-sm font-medium">{env.name}</span>
-                        <span className="truncate text-xs text-muted-foreground">
-                          {track ? track.name : "No music"}
-                        </span>
-                      </span>
-                    </span>
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Music and background always come as a pair.
-          </p>
-        </div>
+                      <input
+                        type="number"
+                        min={1}
+                        max={600}
+                        inputMode="numeric"
+                        aria-label="Custom duration in minutes"
+                        aria-invalid={customInvalid || undefined}
+                        value={customMinutes}
+                        onChange={(e) => {
+                          setCustomMinutes(e.target.value);
+                          setDurationChoice("custom");
+                          setDurationError(null);
+                        }}
+                        placeholder="45"
+                        className="h-full w-full min-w-0 bg-transparent text-right text-base font-semibold text-white outline-none placeholder:text-white/40 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                      />
+                      <span className="text-sm whitespace-nowrap text-white/50">min</span>
+                    </div>
+                  </div>
+                  {customInvalid && (
+                    <p className="text-sm text-red-300" role="alert">
+                      Enter a duration between 1 and 600 minutes.
+                    </p>
+                  )}
+                  {durationError && !customInvalid && (
+                    <p className="text-sm text-red-300" role="alert">
+                      {durationError}
+                    </p>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-        <Button
-          size="lg"
-          className="group/start h-14 w-full rounded-full px-3 text-base font-semibold shadow-[0_16px_48px_-16px_oklch(0.66_0.15_58/0.7)]"
-          onClick={handleStart}
-        >
-          <span className="flex-1 text-center">Start Focus</span>
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary-foreground/15 transition-transform duration-300 group-hover/start:translate-x-0.5 group-hover/start:scale-105 group-active/start:scale-95">
-            <PlayIcon className="size-4 fill-current" />
-          </span>
-        </Button>
+          <div className="mt-5 flex min-h-[150px] flex-1 flex-col">
+            <div className="mb-3 flex shrink-0 flex-col gap-1">
+              <span className="text-sm font-semibold text-white">Environment</span>
+              <p className="text-xs text-white/60">
+                Music and background always come as a pair.
+              </p>
+            </div>
+            <EnvironmentCard
+              env={env}
+              onBrowse={() => setBrowseOpen(true)}
+              className="min-h-[90px] max-h-[220px] w-full flex-1"
+            />
+          </div>
+
+          <div className="mt-5 flex shrink-0 flex-col gap-3">
+            <StartButton onClick={handleStart} />
+          </div>
+        </motion.div>
       </div>
+
+      <EnvironmentBrowseSheet
+        open={browseOpen}
+        onOpenChange={setBrowseOpen}
+        value={environmentId}
+        onChange={setEnvironmentId}
+      />
     </div>
+  );
+}
+
+/**
+ * The environment as a full-bleed preview card. The whole card opens the
+ * browse sheet, and a dedicated 40px corner button offers the same action —
+ * music and background always come as a pair, so one card represents both.
+ * `layout` lets the preview animate its height when the Duration section
+ * appears/disappears and the elastic region resizes it.
+ */
+function EnvironmentCard({
+  env,
+  onBrowse,
+  className,
+}: {
+  env: Environment;
+  onBrowse: () => void;
+  className?: string;
+}) {
+  return (
+    <motion.div
+      layout
+      transition={{ duration: 0.25, ease: "easeInOut" }}
+      className={cn(
+        "group relative block w-full overflow-hidden rounded-2xl ring-1 ring-white/10 ring-inset",
+        className,
+      )}
+    >
+      <EnvironmentThumb env={env} className="absolute inset-0 h-full w-full" />
+      <span
+        aria-hidden
+        className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent"
+      />
+      <span className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-4 sm:p-5">
+        <span className="flex min-w-0 flex-col">
+          <span className="truncate text-[15px] font-semibold text-white">{env.name}</span>
+          <span className="truncate text-xs text-white/68">{env.description}</span>
+        </span>
+      </span>
+      <button
+        type="button"
+        onClick={onBrowse}
+        aria-label={`Choose environment: ${env.name}`}
+        className="absolute inset-0 cursor-pointer outline-none focus-visible:ring-3 focus-visible:ring-accent-orange/60 focus-visible:ring-inset"
+      />
+      <button
+        type="button"
+        onClick={onBrowse}
+        aria-label="Browse all environments"
+        className="absolute top-3 right-3 flex size-10 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-white/15 text-white opacity-90 backdrop-blur-md transition-colors outline-none hover:bg-white/25 hover:opacity-100 focus-visible:ring-3 focus-visible:ring-accent-orange/60"
+      >
+        <LayoutGridIcon className="size-[18px]" />
+      </button>
+    </motion.div>
+  );
+}
+
+/** Primary CTA: starts the session (kicks off audio inside the gesture). */
+function StartButton({ onClick }: { onClick: () => void }) {
+  return (
+    <Button
+      size="lg"
+      className="group/start h-14 w-full rounded-full bg-accent-orange px-3 text-base font-bold text-accent-orange-foreground shadow-[0_8px_24px_rgba(244,169,79,0.3)] hover:bg-accent-orange-hover hover:shadow-[0_8px_28px_rgba(244,169,79,0.4)] active:translate-y-0 active:scale-[0.98]"
+      onClick={onClick}
+    >
+      <span className="flex-1 text-center">Start Focus</span>
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-black/15 transition-transform duration-300 group-hover/start:translate-x-0.5 group-hover/start:scale-105 group-active/start:scale-95">
+        <PlayIcon className="size-4 fill-current" />
+      </span>
+    </Button>
   );
 }

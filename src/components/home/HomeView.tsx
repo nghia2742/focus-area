@@ -7,6 +7,7 @@ import { FocusSetup } from "@/components/focus/FocusSetup";
 import { FocusScreen } from "@/components/focus/FocusScreen";
 import { SessionComplete } from "@/components/focus/SessionComplete";
 import { SiteHeader } from "@/components/layout/SiteHeader";
+import { MainBackground } from "@/components/media/MainBackground";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
@@ -36,7 +37,7 @@ export function HomeView() {
   };
 
   return (
-    <div className="relative flex flex-1 flex-col">
+    <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
       {!session && <SetupBackground />}
       <SiteHeader overlay={!!session} />
       {session ? <FocusScreen onComplete={handleComplete} /> : <FocusSetup />}
@@ -53,18 +54,5 @@ export function HomeView() {
 
 /** Full-bleed artwork behind the setup screen (never during a session). */
 function SetupBackground() {
-  return (
-    <div aria-hidden className="absolute inset-0 z-0">
-      {/* eslint-disable-next-line @next/next/no-img-element -- full-bleed decorative background */}
-      <img
-        src="/setup/main_bg.png"
-        alt=""
-        draggable={false}
-        className="h-full w-full object-cover"
-      />
-      <div className="absolute inset-0 bg-[oklch(0.97_0.02_80)]/45 dark:bg-[oklch(0.11_0.025_55)]/60" />
-      <div className="ambient-glow absolute inset-0 opacity-70" />
-      <div className="noise absolute inset-0 opacity-[0.05] mix-blend-overlay" />
-    </div>
-  );
+  return <MainBackground />;
 }

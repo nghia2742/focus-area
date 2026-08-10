@@ -8,12 +8,16 @@ export const ENVIRONMENTS: Environment[] = [
   {
     id: "quiet",
     name: "Quiet",
+    description: "Pure silence for deep work",
+    category: "quiet",
     musicId: undefined,
     backgroundId: undefined,
   },
   {
     id: "late-night-study",
     name: "Late Night Study",
+    description: "Rain and jazz for city nights",
+    category: "study",
     musicId: "late-night-study",
     backgroundId: "cat-studying",
   },

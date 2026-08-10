@@ -77,10 +77,14 @@ export interface Background {
 export interface Environment {
   id: string;
   name: string;
+  /** Short atmosphere description shown under the name (never a copy of it). */
+  description: string;
   /** Music track id (matches a `MusicTrack`); undefined = quiet. */
   musicId?: string;
   /** Background id (matches a `Background`); undefined = default background. */
   backgroundId?: string;
+  /** Grouping used to filter environments in the browse sheet. */
+  category?: "quiet" | "study" | "nature" | "rain" | "lofi";
 }
 
 export type ThemePreference = "dark" | "light" | "system";

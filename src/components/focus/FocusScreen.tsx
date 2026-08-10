@@ -18,6 +18,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { BackgroundRenderer } from "@/components/media/BackgroundRenderer";
+import { MainBackground } from "@/components/media/MainBackground";
 import { MusicPlayer } from "@/components/media/MusicPlayer";
 import { EnvironmentSelector } from "@/components/media/EnvironmentSelector";
 import { TimerDisplay } from "@/components/timer/TimerDisplay";
@@ -123,7 +124,7 @@ export function FocusScreen({ onComplete }: FocusScreenProps) {
 
   const handleRestoreEnd = () => {
     setRestoreDismissed(true);
-    setShowEndConfirm(true);
+    handleEndSession();
   };
 
   const handleEnvironmentChange = (id: string) => {
@@ -145,7 +146,11 @@ export function FocusScreen({ onComplete }: FocusScreenProps) {
 
   return (
     <div className="relative flex-1 w-full overflow-hidden bg-[oklch(0.14_0.012_60)] text-[oklch(0.95_0.012_70)]">
-      <BackgroundRenderer background={background} />
+      {background ? (
+        <BackgroundRenderer background={background} />
+      ) : (
+        <MainBackground />
+      )}
 
       <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-10 px-4 sm:gap-12">
         {taskName && (
@@ -168,36 +173,40 @@ export function FocusScreen({ onComplete }: FocusScreenProps) {
               onOpenSelector={() => setShowTrackPicker(true)}
               onVolumeChange={(v) => updateVolume(v)}
             />
-            <div className="flex items-center gap-3">
-              {(status === "running" || status === "paused") && (
+            <div className="flex flex-col items-center gap-3">
+              <div className="flex items-center gap-3">
+                {(status === "running" || status === "paused") && (
+                  <Button
+                    size="lg"
+                    className="h-12 min-w-40 gap-2 rounded-full bg-accent-orange px-7 text-base font-semibold text-accent-orange-foreground shadow-[0_8px_24px_rgba(244,169,79,0.28)] hover:bg-accent-orange-hover active:scale-[0.98]"
+                    onClick={() => (isPaused ? resume() : pause())}
+                  >
+                    {isPaused ? (
+                      <>
+                        <PlayIcon className="size-5" />
+                        Resume
+                      </>
+                    ) : (
+                      <>
+                        <PauseIcon className="size-5" />
+                        Pause
+                      </>
+                    )}
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   size="lg"
-                  className="glass h-12 rounded-full px-7 text-white/90 hover:bg-white/10 hover:text-white active:scale-[0.98]"
-                  onClick={() => (isPaused ? resume() : pause())}
+                  className="h-12 gap-2 rounded-full border border-red-400/50 bg-red-950/60 px-6 text-base font-medium text-red-100 backdrop-blur-sm hover:border-red-400/70 hover:bg-red-900/70 active:scale-[0.98]"
+                  onClick={() => setShowEndConfirm(true)}
                 >
-                  {isPaused ? (
-                    <>
-                      <PlayIcon data-icon="inline-start" />
-                      Resume
-                    </>
-                  ) : (
-                    <>
-                      <PauseIcon data-icon="inline-start" />
-                      Pause
-                    </>
-                  )}
+                  <SquareIcon className="size-5" />
+                  End Session
                 </Button>
-              )}
-              <Button
-                variant="ghost"
-                size="lg"
-                className="h-12 rounded-full px-6 text-white/45 hover:bg-white/10 hover:text-white active:scale-[0.98]"
-                onClick={() => setShowEndConfirm(true)}
-              >
-                <SquareIcon data-icon="inline-start" />
-                End
-              </Button>
+              </div>
+              <span className="hidden text-xs tracking-wide text-white/35 sm:inline">
+                Space · pause
+              </span>
             </div>
           </div>
         )}

@@ -2,7 +2,6 @@
 
 import { CheckIcon } from "lucide-react";
 import { ENVIRONMENTS } from "@/data/environments";
-import { getMusicTrack } from "@/data/music";
 import { EnvironmentThumb } from "@/components/media/EnvironmentThumb";
 import { cn } from "@/lib/utils";
 
@@ -25,7 +24,6 @@ export function EnvironmentSelector({
     <div className="flex flex-col gap-2">
       {ENVIRONMENTS.map((env) => {
         const selected = value === env.id;
-        const track = env.musicId ? getMusicTrack(env.musicId) : undefined;
         return (
           <button
             key={env.id}
@@ -44,7 +42,7 @@ export function EnvironmentSelector({
             <span className="min-w-0 flex-1">
               <span className="block truncate text-sm font-medium">{env.name}</span>
               <span className="block truncate text-xs text-muted-foreground">
-                {track ? track.name : "No music"}
+                {env.description}
               </span>
             </span>
             {selected && <CheckIcon className="size-4 shrink-0 text-accent-vivid" />}
