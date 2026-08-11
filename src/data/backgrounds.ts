@@ -14,6 +14,14 @@ export const BACKGROUNDS: Background[] = [
     thumbnailUrl: "/backgrounds/cat-studying.jpg",
     mood: "cozy",
   },
+  {
+    id: "capybara-violin",
+    name: "Capybara Violin",
+    type: "video",
+    assetUrl: "/backgrounds/capybara-violin.mp4",
+    thumbnailUrl: "/backgrounds/capybara-violin.png",
+    mood: "cozy",
+  },
 ];
 
 export function getBackground(id?: string): Background | undefined {

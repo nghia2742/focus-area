@@ -21,6 +21,14 @@ export const ENVIRONMENTS: Environment[] = [
     musicId: "late-night-study",
     backgroundId: "cat-studying",
   },
+  {
+    id: "violin-velvet-study",
+    name: "Violin Velvet Study",
+    description: "Velvet strings and a capybara, one perfect room",
+    category: "study",
+    musicId: "violin-velvet-study-room",
+    backgroundId: "capybara-violin",
+  },
 ];
 
 export function getEnvironment(id?: string): Environment | undefined {
