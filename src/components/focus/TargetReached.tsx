@@ -4,6 +4,12 @@ import { SparklesIcon } from "lucide-react";
 import { useFocusTimer } from "@/hooks/useFocusTimer";
 import { formatDurationCompact } from "@/lib/timer/format";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface TargetReachedProps {
   onFinish: () => void;
@@ -14,16 +20,28 @@ export function TargetReached({ onFinish, onKeepFocusing }: TargetReachedProps) 
   const { elapsedSec } = useFocusTimer();
 
   return (
-    <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      <div className="glass-deep flex w-full max-w-sm flex-col items-center gap-5 rounded-3xl p-8 text-center">
+    <Dialog open onOpenChange={(open) => !open && onKeepFocusing()}>
+      <DialogContent
+        showCloseButton={false}
+        overlayClassName="bg-black/50 backdrop-blur-sm"
+        className="glass-deep flex w-full max-w-sm flex-col items-center gap-5 rounded-3xl p-8 text-center text-white ring-0 shadow-none sm:max-w-sm"
+        onEscapeKeyDown={(e) => {
+          e.preventDefault();
+          onKeepFocusing();
+        }}
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <span className="flex size-12 items-center justify-center rounded-2xl bg-accent-vivid/15">
           <SparklesIcon className="size-6 text-accent-vivid" aria-hidden />
         </span>
         <div className="flex flex-col gap-1.5">
-          <h2 className="text-xl font-semibold tracking-tight text-white">Target reached</h2>
-          <p className="text-sm text-white/60">
+          <DialogTitle className="font-sans text-xl font-semibold tracking-tight text-white">
+            Target reached
+          </DialogTitle>
+          <DialogDescription className="text-sm text-white/60">
             You&apos;ve focused for {formatDurationCompact(elapsedSec)}.
-          </p>
+          </DialogDescription>
         </div>
         <div className="flex w-full flex-col gap-2 sm:flex-row">
           <Button
@@ -37,7 +55,7 @@ export function TargetReached({ onFinish, onKeepFocusing }: TargetReachedProps) 
             Keep Focusing
           </Button>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

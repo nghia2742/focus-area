@@ -1,14 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { motion, useReducedMotion } from "motion/react";
 import {
-  Disc3Icon,
   EyeIcon,
   EyeOffIcon,
   MountainIcon,
   MusicIcon,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useSettingsStore } from "@/store/settingsStore";
 
 /**
@@ -19,7 +17,7 @@ import { useSettingsStore } from "@/store/settingsStore";
  */
 export function FocusRail() {
   return (
-    <div className="fixed top-1/2 right-6 z-40 flex -translate-y-1/2 flex-col items-center gap-4">
+    <div className="fixed top-1/2 right-3 z-40 flex -translate-y-1/2 flex-col items-center gap-3 sm:right-6 sm:gap-4">
       <ZenButton />
       <BackgroundsButton />
       <SoundsButton />
@@ -33,7 +31,10 @@ export function FocusRail() {
 
 /** Glassmorphism pill shared by the rail buttons (48×48). */
 const railButton =
-  "flex size-12 items-center justify-center rounded-full border border-white/12 bg-white/8 text-white/85 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-[12px] outline-none transition-[background-color,border-color,color,transform] duration-200 hover:border-white/20 hover:bg-white/12 hover:text-white active:scale-95 focus-visible:ring-3 focus-visible:ring-white/30";
+  "flex size-11 items-center justify-center rounded-full border border-white/12 bg-white/8 text-white/85 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-[12px] outline-none transition-[background-color,border-color,color,transform,opacity] duration-200 hover:border-white/20 hover:bg-white/12 hover:text-white active:scale-95 focus-visible:ring-3 focus-visible:ring-white/30 sm:size-12";
+
+const railButtonDisabled =
+  "cursor-not-allowed opacity-45 hover:border-white/12 hover:bg-white/8 hover:text-white/85 active:scale-100";
 
 function ZenButton() {
   const zenMode = useSettingsStore((s) => s.zenMode);
@@ -58,46 +59,27 @@ function BackgroundsButton() {
   return (
     <button
       type="button"
-      onClick={() => console.log("Backgrounds — coming soon")}
-      aria-label="Backgrounds"
-      title="Backgrounds"
-      className={railButton}
+      disabled
+      aria-label="Backgrounds (coming soon)"
+      title="Backgrounds (coming soon)"
+      className={cn(railButton, railButtonDisabled)}
     >
       <MountainIcon className="size-5" />
     </button>
   );
 }
 
-/**
- * Sounds — two visual states only (no real audio yet): a still note when
- * idle, a slowly rotating disc when "playing". Clicking toggles the demo
- * state. The rotation is disabled under prefers-reduced-motion.
- */
+/** Placeholder — real session audio controls are not exposed here yet. */
 function SoundsButton() {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const reduceMotion = useReducedMotion();
-  const rotating = isPlaying && !reduceMotion;
-
   return (
     <button
       type="button"
-      onClick={() => setIsPlaying((v) => !v)}
-      aria-pressed={isPlaying}
-      aria-label={isPlaying ? "Pause music" : "Play music"}
-      title={isPlaying ? "Playing — tap to pause" : "Music off — tap to play"}
-      className={railButton}
+      disabled
+      aria-label="Sounds (coming soon)"
+      title="Sounds (coming soon)"
+      className={cn(railButton, railButtonDisabled)}
     >
-      <motion.div
-        className="flex size-5 items-center justify-center"
-        animate={rotating ? { rotate: 360 } : { rotate: 0 }}
-        transition={
-          rotating
-            ? { repeat: Infinity, duration: 8, ease: "linear" }
-            : { duration: 0 }
-        }
-      >
-        {isPlaying ? <Disc3Icon className="size-5" /> : <MusicIcon className="size-5" />}
-      </motion.div>
+      <MusicIcon className="size-5" />
     </button>
   );
 }

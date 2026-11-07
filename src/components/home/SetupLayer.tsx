@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ClockIcon } from "lucide-react";
 import { FocusSetupSheet } from "@/components/focus/FocusSetupSheet";
 import { ZenFade } from "@/components/home/ZenFade";
@@ -15,11 +15,20 @@ import { IdleCenterContent } from "@/components/home/IdleCenterContent";
  */
 export function SetupLayer() {
   const [sheetOpen, setSheetOpen] = useState(false);
+  const ctaRef = useRef<HTMLButtonElement>(null);
+  const wasOpenRef = useRef(false);
+
+  useEffect(() => {
+    if (wasOpenRef.current && !sheetOpen) {
+      ctaRef.current?.focus();
+    }
+    wasOpenRef.current = sheetOpen;
+  }, [sheetOpen]);
 
   return (
     <>
       <ZenFade>
-        <FocusCta onOpen={() => setSheetOpen(true)} />
+        <FocusCta ref={ctaRef} onOpen={() => setSheetOpen(true)} />
       </ZenFade>
       <IdleCenterContent />
       <FocusSetupSheet open={sheetOpen} onOpenChange={setSheetOpen} />
@@ -27,13 +36,18 @@ export function SetupLayer() {
   );
 }
 
+interface FocusCtaProps {
+  onOpen: () => void;
+}
+
 /**
  * Round Start Focus CTA — the one solid-accent element, deliberately distinct
  * from the flat rail so it reads as the primary action.
  */
-function FocusCta({ onOpen }: { onOpen: () => void }) {
+function FocusCta({ ref, onOpen }: FocusCtaProps & { ref: React.Ref<HTMLButtonElement> }) {
   return (
     <button
+      ref={ref}
       type="button"
       onClick={onOpen}
       aria-label="Start a focus session"

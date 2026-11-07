@@ -102,6 +102,7 @@ function SettingsForm() {
         <CardContent>
           <ToggleGroup
             type="single"
+            aria-label="Theme"
             value={settings.theme}
             onValueChange={handleTheme}
             variant="outline"
@@ -127,6 +128,7 @@ function SettingsForm() {
             <FieldLabel>Default mode</FieldLabel>
             <ToggleGroup
               type="single"
+              aria-label="Default focus mode"
               value={settings.defaultMode}
               onValueChange={(v) => v && update({ defaultMode: v as FocusMode })}
               variant="outline"
@@ -146,6 +148,7 @@ function SettingsForm() {
             <FieldContent className="flex flex-col gap-2">
               <ToggleGroup
                 type="single"
+                aria-label="Default target duration"
                 value={
                   FOCUS_DURATION_PRESETS.includes(settings.defaultDuration)
                     ? String(settings.defaultDuration)

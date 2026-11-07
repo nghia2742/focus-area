@@ -148,8 +148,8 @@ export function FocusTimer({ onComplete }: FocusTimerProps) {
                 End Session
               </Button>
             </div>
-            <span className="hidden text-xs tracking-wide text-white/35 sm:inline">
-              Space · pause
+            <span className="hidden text-xs tracking-wide text-white/55 sm:inline">
+              Space · pause / resume
             </span>
           </div>
         )}

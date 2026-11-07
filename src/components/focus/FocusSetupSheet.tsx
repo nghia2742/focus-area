@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { PlayIcon, TimerIcon, TimerOffIcon } from "lucide-react";
 import type { FocusMode } from "@/types/focus";
@@ -49,12 +49,43 @@ export function FocusSetupSheet({ open, onOpenChange }: FocusSetupSheetProps) {
   );
 }
 
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 function SheetPanel({ onClose }: { onClose: () => void }) {
   const reduceMotion = useReducedMotion();
+  const panelRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const panel = panelRef.current;
+      if (!panel) return;
+      const focusables = Array.from(
+        panel.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
+      ).filter((el) => !el.hasAttribute("disabled") && el.tabIndex !== -1);
+      if (focusables.length === 0) {
+        e.preventDefault();
+        return;
+      }
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+      if (e.shiftKey) {
+        if (active === first || !panel.contains(active)) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else if (active === last || !panel.contains(active)) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -76,7 +107,8 @@ function SheetPanel({ onClose }: { onClose: () => void }) {
     >
       <motion.button
         type="button"
-        aria-label="Close"
+        aria-label="Close focus setup"
+        tabIndex={-1}
         className="absolute inset-0 bg-black/45 backdrop-blur-[2px]"
         onClick={onClose}
         variants={{
@@ -89,9 +121,10 @@ function SheetPanel({ onClose }: { onClose: () => void }) {
       />
 
       <motion.div
+        ref={panelRef}
         role="dialog"
         aria-modal="true"
-        aria-label="Start a focus session"
+        aria-labelledby={titleId}
         className="relative flex max-h-[80dvh] w-full flex-col overflow-hidden rounded-t-3xl border-t border-white/10 bg-[rgba(20,16,14,0.94)] shadow-[0_-24px_60px_rgba(0,0,0,0.5)] backdrop-blur-2xl"
         variants={{
           open: { y: "0%", transition: panelTransition },
@@ -107,10 +140,10 @@ function SheetPanel({ onClose }: { onClose: () => void }) {
             aria-hidden
           />
           <div className="flex shrink-0 flex-col gap-1">
-            <h2 className="text-xl font-bold tracking-tight text-white">
+            <h2 id={titleId} className="text-xl font-bold tracking-tight text-white">
               What are you working on?
             </h2>
-            <p className="text-sm text-white/68">
+            <p className="text-sm text-white/75">
               Set an intention, then disappear into it.
             </p>
           </div>
@@ -146,6 +179,7 @@ function SheetFormInner({ onStart }: { onStart: () => void }) {
   );
   const [durationError, setDurationError] = useState<string | null>(null);
   const taskRef = useRef<HTMLInputElement>(null);
+  const customDurationRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     taskRef.current?.focus();
@@ -167,6 +201,9 @@ function SheetFormInner({ onStart }: { onStart: () => void }) {
       const d = resolvedDuration();
       if (d == null) {
         setDurationError("Enter a duration between 1 and 600 minutes.");
+        if (durationChoice === "custom") {
+          customDurationRef.current?.focus();
+        }
         return;
       }
       targetDuration = d;
@@ -221,6 +258,7 @@ function SheetFormInner({ onStart }: { onStart: () => void }) {
           <span className="text-sm font-semibold text-white">Mode</span>
           <ToggleGroup
             type="single"
+            aria-label="Focus mode"
             value={mode}
             onValueChange={(v) => {
               if (v) {
@@ -258,6 +296,7 @@ function SheetFormInner({ onStart }: { onStart: () => void }) {
               <div className="flex flex-wrap items-center gap-2">
                 <ToggleGroup
                   type="single"
+                  aria-label="Target duration presets"
                   value={
                     FOCUS_DURATION_PRESETS.includes(Number(durationChoice))
                       ? durationChoice
@@ -296,6 +335,7 @@ function SheetFormInner({ onStart }: { onStart: () => void }) {
                     Custom
                   </span>
                   <input
+                    ref={customDurationRef}
                     type="number"
                     min={1}
                     max={600}

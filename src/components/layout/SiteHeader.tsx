@@ -19,7 +19,7 @@ export function SiteHeader() {
     <header className="absolute inset-x-0 top-0 z-40 flex items-center justify-between px-4 py-3 sm:px-6">
       <Link
         href="/"
-        className="group flex items-center gap-2.5 rounded-full py-2 pr-2 pl-1 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="group flex min-h-11 items-center gap-2.5 rounded-full px-2 py-2 outline-none focus-visible:ring-2 focus-visible:ring-ring"
         aria-label="Focus home"
       >
         <span className="relative flex size-6 items-center justify-center">
@@ -29,23 +29,23 @@ export function SiteHeader() {
         <span className="text-sm font-semibold tracking-tight text-white">Focus</span>
       </Link>
 
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-1 sm:gap-3">
         <button
           type="button"
           onClick={() => setHistoryOpen(true)}
           aria-label="Open focus history"
-          className="group inline-flex items-center gap-1.5 rounded-full py-2 pr-2 pl-1 text-sm font-medium text-white/80 outline-none transition-colors duration-150 hover:text-white focus-visible:ring-2 focus-visible:ring-ring"
+          className="group inline-flex min-h-11 items-center gap-1.5 rounded-full px-2 py-2 text-sm font-medium text-white/85 outline-none transition-colors duration-150 hover:text-white focus-visible:ring-2 focus-visible:ring-ring sm:px-3"
         >
-          <HistoryIcon className="size-4 text-white/55 transition-colors group-hover:text-white/85" />
+          <HistoryIcon className="size-4 text-white/60 transition-colors group-hover:text-white/90" aria-hidden />
           History
         </button>
         <button
           type="button"
           onClick={() => setSettingsOpen(true)}
           aria-label="Open settings"
-          className="group inline-flex items-center gap-1.5 rounded-full py-2 pr-2 pl-1 text-sm font-medium text-white/80 outline-none transition-colors duration-150 hover:text-white focus-visible:ring-2 focus-visible:ring-ring"
+          className="group inline-flex min-h-11 items-center gap-1.5 rounded-full px-2 py-2 text-sm font-medium text-white/85 outline-none transition-colors duration-150 hover:text-white focus-visible:ring-2 focus-visible:ring-ring sm:px-3"
         >
-          <SettingsIcon className="size-4 text-white/55 transition-colors group-hover:text-white/85" />
+          <SettingsIcon className="size-4 text-white/60 transition-colors group-hover:text-white/90" aria-hidden />
           Settings
         </button>
       </div>
