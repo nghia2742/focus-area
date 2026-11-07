@@ -841,6 +841,11 @@
   html {
     @apply font-sans;
   }
+  /* Tailwind v4 resets buttons to cursor: default; interactive controls should point. */
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
 }
 
 /* Chrome that floats over the room artwork (rail, chip surfaces). */
@@ -873,4 +878,54 @@
 /* Timer display: geometric tabular figures so digits don't jitter. */
 @utility font-tabular {
   font-variant-numeric: tabular-nums;
+}
+
+/*
+ * Custom scrollbars.
+ *
+ * The accent is the theme's --primary (the color picked in Settings → Theme),
+ * so switching the accent repaints every scrollbar live — nothing is hardcoded
+ * and both light/dark come for free because --primary already flips with the
+ * mode. Blink/WebKit get the rounded pill thumb from ::-webkit-scrollbar.
+ *
+ * The standard properties are gated behind `@supports not selector(::-webkit-scrollbar)`
+ * on purpose: setting `scrollbar-color` makes Chromium ignore ::-webkit-scrollbar,
+ * so only engines without those pseudo-elements (Firefox) take that path.
+ */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  /* 35% accent, inset 2px by a transparent border so the pill stays thin. */
+  background-color: color-mix(in oklch, var(--primary) 35%, transparent);
+  border: 2px solid transparent;
+  border-radius: 9999px;
+  background-clip: padding-box;
+  transition: background-color 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--primary);
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    /* Plain accent first; tinted accent where color-mix is supported. */
+    scrollbar-color: var(--primary) transparent;
+    scrollbar-color: color-mix(in oklch, var(--primary) 45%, transparent) transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::-webkit-scrollbar-thumb {
+    transition: none;
+  }
 }

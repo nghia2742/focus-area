@@ -40,7 +40,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[85dvh] w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-3xl">
+      <DialogContent className="flex h-[min(85dvh,42rem)] w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-3xl">
         <DialogHeader className="border-b px-5 py-4 pr-12">
           <DialogTitle>Settings</DialogTitle>
           <DialogDescription>

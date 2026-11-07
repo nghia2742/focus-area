@@ -46,7 +46,7 @@ export function FocusTimer({ onComplete }: FocusTimerProps) {
     if (status !== "target_reached" || !session) return;
     if (notifiedFor.current === session.id) return;
     notifiedFor.current = session.id;
-    notifyTargetReached(session.targetDuration ?? 0);
+    notifyTargetReached(session.targetDuration ?? 0, session.completionMessage);
   }, [status, session]);
 
   /* Keyboard: Space / K toggles pause-resume when nothing is open. */

@@ -1,15 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ClockIcon } from "lucide-react";
+import { PlayIcon } from "lucide-react";
 import { FocusSetupSheet } from "@/components/focus/FocusSetupSheet";
 import { ZenFade } from "@/components/home/ZenFade";
 import { IdleCenterContent } from "@/components/home/IdleCenterContent";
 import { Button } from "@/components/ui/button";
 
 /**
- * The home-screen setup chrome when no session is active: the round Focus
- * CTA (center-bottom) that opens the Focus Setup sheet, plus the idle greeting
+ * The home-screen setup chrome when no session is active: the bottom-center
+ * Focus CTA pill that opens the Focus Setup sheet, plus the idle greeting
  * above it. Both fade with Zen Mode (the greeting keeps its own 0.55 base so
  * opacity never stacks). The sheet itself is not wrapped, so it keeps full
  * opacity when open.
@@ -42,8 +42,9 @@ interface FocusCtaProps {
 }
 
 /**
- * Round Start Focus CTA — the one solid-accent element on the idle screen, so
- * it reads as the primary action.
+ * Start Focus CTA — the one solid-accent element on the idle screen, so it
+ * reads as the primary action. Labelled (not icon-only) so a first-time user
+ * knows what it does without hovering.
  */
 function FocusCta({ ref, onOpen }: FocusCtaProps & { ref: React.Ref<HTMLButtonElement> }) {
   return (
@@ -52,9 +53,11 @@ function FocusCta({ ref, onOpen }: FocusCtaProps & { ref: React.Ref<HTMLButtonEl
       type="button"
       onClick={onOpen}
       aria-label="Start a focus session"
-      className="fixed bottom-8 left-1/2 z-30 size-16 -translate-x-1/2 rounded-full shadow-lg"
+      size="xl"
+      className="fixed bottom-8 left-1/2 z-30 -translate-x-1/2 rounded-full px-6"
     >
-      <ClockIcon className="size-7" />
+      <PlayIcon data-icon="inline-start" />
+      Start focus
     </Button>
   );
 }

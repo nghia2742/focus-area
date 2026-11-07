@@ -121,7 +121,8 @@ Module-level singleton (`export const musicPlayer`) — one looped `HTMLAudioEle
 ## 8. Notifications (`src/lib/notifications.ts`)
 
 - `requestNotificationPermission()` — best-effort, called from the Start Focus gesture.
-- `notifyTargetReached(minutes)` — fires only when permission is `granted`; wrapped in try/catch and never blocking. `FocusTimer` dedupes it per session id.
+- `previewCompletionNotification(minutes, message)` — asks for permission while it is still `default`, then shows the notification with a `-preview` tag; returns the resulting `NotificationPermission` (or `"unsupported"`). Called from the preview button's click gesture.
+- `notifyTargetReached(minutes, message?)` — fires only when permission is `granted`; the body is the custom message or the default sentence; wrapped in try/catch and never blocking. `FocusTimer` dedupes it per session id.
 
 ## 9. Environments & data
 

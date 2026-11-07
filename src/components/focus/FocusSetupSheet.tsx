@@ -1,13 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { PlayIcon, TimerIcon, TimerOffIcon } from "lucide-react";
+import { BellIcon, PlayIcon, TimerIcon, TimerOffIcon } from "lucide-react";
+import { toast } from "sonner";
 import type { FocusMode } from "@/types/focus";
-import { FOCUS_DURATION_PRESETS } from "@/types/focus";
+import { FOCUS_DURATION_PRESETS, MAX_COMPLETION_MESSAGE_LENGTH } from "@/types/focus";
 import { ENVIRONMENTS, getEnvironment } from "@/data/environments";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useFocusStore } from "@/store/focusStore";
-import { requestNotificationPermission } from "@/lib/notifications";
+import {
+  previewCompletionNotification,
+  requestNotificationPermission,
+} from "@/lib/notifications";
 import { Button } from "@/components/ui/button";
 import {
   Field,
@@ -17,6 +21,11 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -35,9 +44,9 @@ interface FocusSetupSheetProps {
 }
 
 /**
- * Bottom sheet triggered by the round Focus CTA: Task (optional) + Mode
- * (Open / Target) + Duration + Start. The environment pair is applied
- * silently from settings — there is no picker here.
+ * Bottom sheet triggered by the Focus CTA: Task (optional) + Mode (Open /
+ * Target) + Duration + finish message (Target only) + Start. The environment
+ * pair is applied silently from settings — there is no picker here.
  */
 export function FocusSetupSheet({ open, onOpenChange }: FocusSetupSheetProps) {
   return (
@@ -85,6 +94,9 @@ function SheetFormInner({ onStart }: { onStart: () => void }) {
       : String(settings.defaultDuration),
   );
   const [durationError, setDurationError] = useState<string | null>(null);
+  const [finishMessage, setFinishMessage] = useState(
+    () => settings.completionMessage ?? "",
+  );
 
   const resolvedDuration = (): number | null => {
     if (mode !== "target") return null;
@@ -96,8 +108,26 @@ function SheetFormInner({ onStart }: { onStart: () => void }) {
     return Number.parseInt(durationChoice, 10);
   };
 
+  /** Asks for permission (if needed) and shows the finish notification. */
+  const handlePreviewMessage = async () => {
+    const result = await previewCompletionNotification(
+      resolvedDuration() ?? settings.defaultDuration,
+      finishMessage,
+    );
+    if (result === "granted") {
+      toast.success("Preview sent — check your notifications.");
+    } else if (result === "denied") {
+      toast.error("Notifications are blocked. Allow them in your browser settings.");
+    } else if (result === "unsupported") {
+      toast.error("This browser doesn't support notifications.");
+    } else {
+      toast("Notification permission was not granted.");
+    }
+  };
+
   const handleStart = () => {
     let targetDuration: number | undefined;
+    let completionMessage: string | undefined;
     if (mode === "target") {
       const d = resolvedDuration();
       if (d == null) {
@@ -105,6 +135,7 @@ function SheetFormInner({ onStart }: { onStart: () => void }) {
         return;
       }
       targetDuration = d;
+      completionMessage = finishMessage.trim() || undefined;
     }
 
     // No environment picker in setup — apply the remembered pair, else default.
@@ -118,11 +149,13 @@ function SheetFormInner({ onStart }: { onStart: () => void }) {
       taskName,
       mode,
       targetDuration,
+      completionMessage,
       musicId: environment.musicId,
       backgroundId: environment.backgroundId,
     });
 
     if (taskName.trim()) update({ lastTaskName: taskName.trim() });
+    if (mode === "target") update({ completionMessage: completionMessage ?? "" });
     if (settings.rememberLastEnvironment) update({ lastEnvironmentId: environment.id });
 
     requestNotificationPermission();
@@ -174,54 +207,98 @@ function SheetFormInner({ onStart }: { onStart: () => void }) {
         </Field>
 
         {mode === "target" && (
-          <Field data-invalid={durationError ? true : undefined}>
-            <FieldLabel>Duration</FieldLabel>
-            <ToggleGroup
-              type="single"
-              variant="outline"
-              size="lg"
-              aria-label="Target duration"
-              value={durationChoice}
-              onValueChange={(v) => {
-                if (v) setDurationChoice(v as DurationChoice);
-                setDurationError(null);
-              }}
-              className="w-full"
-            >
-              {FOCUS_DURATION_PRESETS.map((d) => (
-                <ToggleGroupItem key={d} value={String(d)} className="flex-1">
-                  {d}m
+          <>
+            <Field data-invalid={durationError ? true : undefined}>
+              <FieldLabel>Duration</FieldLabel>
+              <ToggleGroup
+                type="single"
+                variant="outline"
+                size="lg"
+                aria-label="Target duration"
+                value={durationChoice}
+                onValueChange={(v) => {
+                  if (v) setDurationChoice(v as DurationChoice);
+                  setDurationError(null);
+                }}
+                className="w-full"
+              >
+                {FOCUS_DURATION_PRESETS.map((d) => (
+                  <ToggleGroupItem key={d} value={String(d)} className="flex-1">
+                    {d}m
+                  </ToggleGroupItem>
+                ))}
+                <ToggleGroupItem value="custom" className="flex-1">
+                  Custom
                 </ToggleGroupItem>
-              ))}
-              <ToggleGroupItem value="custom" className="flex-1">
-                Custom
-              </ToggleGroupItem>
-            </ToggleGroup>
+              </ToggleGroup>
 
-            {durationChoice === "custom" && (
-              <>
+              {durationChoice === "custom" && (
+                <>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={600}
+                    inputMode="numeric"
+                    aria-label="Custom duration in minutes"
+                    aria-invalid={durationError ? true : undefined}
+                    placeholder="45"
+                    value={customMinutes}
+                    onChange={(e) => {
+                      setCustomMinutes(e.target.value);
+                      setDurationError(null);
+                    }}
+                    onKeyDown={(e) => e.key === "Enter" && handleStart()}
+                    autoFocus
+                  />
+                  <FieldDescription>1–600 minutes.</FieldDescription>
+                </>
+              )}
+
+              <FieldError>{durationError}</FieldError>
+            </Field>
+
+            <Field>
+              <FieldLabel htmlFor="completion-message">
+                Finish message <span className="font-normal text-muted-foreground">(optional)</span>
+              </FieldLabel>
+              <div className="flex items-center gap-2">
                 <Input
-                  type="number"
-                  min={1}
-                  max={600}
-                  inputMode="numeric"
-                  aria-label="Custom duration in minutes"
-                  aria-invalid={durationError ? true : undefined}
-                  placeholder="45"
-                  value={customMinutes}
-                  onChange={(e) => {
-                    setCustomMinutes(e.target.value);
-                    setDurationError(null);
-                  }}
-                  onKeyDown={(e) => e.key === "Enter" && handleStart()}
-                  autoFocus
+                  id="completion-message"
+                  value={finishMessage}
+                  maxLength={MAX_COMPLETION_MESSAGE_LENGTH}
+                  onChange={(e) =>
+                    setFinishMessage(
+                      e.target.value.slice(0, MAX_COMPLETION_MESSAGE_LENGTH),
+                    )
+                  }
+                  placeholder="e.g. Stand up, stretch, drink water"
+                  autoComplete="off"
                 />
-                <FieldDescription>1–600 minutes.</FieldDescription>
-              </>
-            )}
-
-            <FieldError>{durationError}</FieldError>
-          </Field>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      aria-label="Preview the finish notification"
+                      onClick={handlePreviewMessage}
+                    >
+                      <BellIcon />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Preview notification</TooltipContent>
+                </Tooltip>
+              </div>
+              <div className="flex items-baseline justify-between gap-3">
+                <FieldDescription>
+                  Shown when the timer reaches zero. Leave empty for the default.
+                </FieldDescription>
+                <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+                  {finishMessage.length}/{MAX_COMPLETION_MESSAGE_LENGTH}
+                </span>
+              </div>
+            </Field>
+          </>
         )}
       </FieldGroup>
 

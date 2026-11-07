@@ -12,6 +12,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   musicVolume: 0.6,
   rememberLastEnvironment: true,
   lastTaskName: "",
+  completionMessage: "",
 };
 
 function isBrowser(): boolean {

@@ -24,7 +24,7 @@ Ponytail sets scope and size — it never overrides the UI rules, timer/hydratio
 
 The design system is `components.json` (style `radix-nova`, baseColor `neutral`, icon library `lucide`) plus the tokens in `src/app/globals.css`. Do not build a parallel style layer: no bespoke buttons, inputs, cards, dialogs, chips, empty states or spinners.
 
-**1. Look before you write.** Installed primitives live in `src/components/ui/`: `badge`, `button`, `card`, `chart`, `dialog`, `empty`, `field`, `input`, `label`, `separator`, `sheet`, `skeleton`, `slider`, `sonner`, `switch`, `toggle-group`, `toggle`, `tooltip`. Read the actual file before using it — this style is `radix-nova` (radix-ui + `asChild`), and the API differs from older shadcn docs (`FieldGroup`/`Field`/`FieldLabel`, `ToggleGroup`, `CardAction`, `Button size="icon-sm"`, icons via `data-icon`).
+**1. Look before you write.** Installed primitives live in `src/components/ui/`: `badge`, `button`, `button-group`, `card`, `chart`, `dialog`, `empty`, `field`, `input`, `label`, `separator`, `sheet`, `skeleton`, `slider`, `sonner`, `switch`, `toggle-group`, `toggle`, `tooltip`. Read the actual file before using it — this style is `radix-nova` (radix-ui + `asChild`), and the API differs from older shadcn docs (`FieldGroup`/`Field`/`FieldLabel`, `ToggleGroup`, `CardAction`, `Button size="icon-sm"`, icons via `data-icon`).
 
 **2. Compose, don't reinvent.**
 
@@ -85,12 +85,12 @@ npx tsc --noEmit # typecheck (needs .next/types to exist — run dev/build once 
 ```
 src/app/layout.tsx        html/body shell + Providers (next-themes, ThemeSync, Toaster)
 src/app/page.tsx          the ONLY route: <HomeView/>  (no /focus /history /settings routes)
-src/components/home/HomeView.tsx   <MainBackground/> + ZenFade(<SiteHeader/>) + ZenFade(<FocusRail/>) + (session ? <FocusTimer/> : <SetupLayer/>) + SessionComplete dialog
+src/components/home/HomeView.tsx   <MainBackground/> + ZenFade(<SiteHeader/>) + (session ? <FocusTimer/> : <SetupLayer/>) + SessionComplete dialog
 src/components/home/SetupLayer.tsx   idle chrome: FocusCta → FocusSetupSheet (setup form), IdleCenterContent, ZenFade
 src/components/focus/FocusTimer.tsx  immersive timer screen (timer, controls, dialogs)
 src/components/focus/FocusSetupSheet.tsx  the setup sheet (task, mode, duration, start; no environment picker)
 src/components/timer/TimerDisplay.tsx  the ticking render (useNow + useFocusTimer)
-src/components/layout/SiteHeader.tsx   header w/ History & Settings buttons → dialogs
+src/components/layout/SiteHeader.tsx   header: icon ButtonGroup (History, Settings, Zen Mode) → dialogs
 src/components/history/*   HistoryDialog: FocusStats, WeekChart, SessionList, SessionItem
 src/components/settings/SettingsDialog.tsx
 src/components/media/*     MainBackground (full-bleed artwork layer)

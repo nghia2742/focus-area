@@ -17,8 +17,7 @@ src/app/layout.tsx (shell + Providers)
 hydrated? ── no ──► Skeleton
    │ yes
 <MainBackground/>                       fixed room video + scrim + noise
-<ZenFade><SiteHeader/></ZenFade>        logo + History / Settings dialogs
-<ZenFade><FocusRail/></ZenFade>         Zen Mode toggle (right edge)
+<ZenFade><SiteHeader/></ZenFade>        logo + Zen Mode / History / Settings
 session active?
    ├─ yes ──► <FocusTimer onComplete={...}/>   inline timer over the artwork
    ├─ no  ──► <SetupLayer/>                    CTA + greeting + setup sheet
@@ -43,7 +42,7 @@ The idle screen instead renders:
 
 ```
 SetupLayer
-├── ZenFade > FocusCta           round bottom-center button → opens sheet
+├── ZenFade > FocusCta           bottom-center "Start focus" pill → opens sheet
 ├── IdleCenterContent            greeting / last task name (ZenFade, base 0.55)
 └── FocusSetupSheet              bottom Sheet (task, mode, duration, start)
 ```
@@ -110,7 +109,7 @@ persist rehydrates `session` (startedLocally is not persisted)
 src/app/            layout, page, providers, globals.css (Tailwind v4 theme)
 src/components/
   home/             HomeView (page switch), SetupLayer, IdleCenterContent,
-                    FocusRail, ZenFade
+                    ZenFade
   focus/            FocusTimer, FocusSetupSheet, TargetReached, EndConfirmDialog,
                     SessionComplete, ActiveSessionRestore
   history/          HistoryDialog, FocusStats, WeekChart, SessionList, SessionItem

@@ -26,6 +26,7 @@ export function createSession(config: FocusConfig, now: number): ActiveSession {
     overtimeSince: null,
     musicId: config.musicId,
     backgroundId: config.backgroundId,
+    completionMessage: config.completionMessage?.trim() || undefined,
     createdAt: now,
   };
 }

@@ -47,6 +47,8 @@ export interface ActiveSession {
   overtimeSince: number | null;
   musicId?: string;
   backgroundId?: string;
+  /** Custom body for the finish notification (target mode only). */
+  completionMessage?: string;
   createdAt: number;
 }
 
@@ -95,6 +97,8 @@ export interface AppSettings {
   lastEnvironmentId?: string;
   /** Last task entered in Focus Setup — shown on the idle screen when set. */
   lastTaskName?: string;
+  /** Remembered custom finish-notification message (empty = default body). */
+  completionMessage?: string;
 }
 
 /** User's choices when launching a new focus session. */
@@ -102,9 +106,12 @@ export interface FocusConfig {
   taskName: string;
   mode: FocusMode;
   targetDuration?: number;
+  completionMessage?: string;
   musicId?: string;
   backgroundId?: string;
 }
 
 export const FOCUS_DURATION_PRESETS: readonly number[] = [25, 50, 90];
 export const DEFAULT_TASK_NAME = "Focus Session";
+/** Max length of the custom finish-notification message. */
+export const MAX_COMPLETION_MESSAGE_LENGTH = 100;

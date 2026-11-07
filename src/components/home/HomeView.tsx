@@ -7,7 +7,6 @@ import { FocusTimer } from "@/components/focus/FocusTimer";
 import { SessionComplete } from "@/components/focus/SessionComplete";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SetupLayer } from "@/components/home/SetupLayer";
-import { FocusRail } from "@/components/home/FocusRail";
 import { ZenFade } from "@/components/home/ZenFade";
 import { MainBackground } from "@/components/media/MainBackground";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -15,8 +14,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 /**
  * The single page of the app. The room artwork always fills the screen; the
  * setup chrome (CTA + sheet) swaps to the inline timer when a session is
- * active — the session never leaves the main screen. The navbar and the
- * top-right rail persist throughout and share the Zen Mode fade.
+ * active — the session never leaves the main screen. The navbar (including the
+ * Zen Mode toggle) persists throughout and fades with Zen Mode.
  */
 export function HomeView() {
   const session = useFocusStore((s) => s.session);
@@ -27,7 +26,7 @@ export function HomeView() {
     return (
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-5 py-12">
         <Skeleton className="h-9 w-48" />
-        <div className="ml-auto flex flex-col items-center gap-1.5 pr-3 pt-2">
+        <div className="ml-auto flex items-center gap-1.5 pr-3">
           <Skeleton className="size-9 rounded-md" />
           <Skeleton className="size-9 rounded-md" />
           <Skeleton className="size-9 rounded-md" />
@@ -45,9 +44,6 @@ export function HomeView() {
       <MainBackground />
       <ZenFade>
         <SiteHeader />
-      </ZenFade>
-      <ZenFade>
-        <FocusRail />
       </ZenFade>
       {session ? <FocusTimer onComplete={handleComplete} /> : <SetupLayer />}
 

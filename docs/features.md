@@ -2,15 +2,15 @@
 
 Everything described here is implemented and lives on the single `/` route. History and Settings are dialogs, not pages.
 
-## 1. Idle screen (`SetupLayer`, `IdleCenterContent`, `FocusRail`, `SiteHeader`)
+## 1. Idle screen (`SetupLayer`, `IdleCenterContent`, `SiteHeader`)
 
 The app always sits on a full-bleed room artwork; the setup chrome floats over it.
 
 - **Artwork** — `MainBackground` loops `public/backgrounds/270507_small.mp4` (muted, `object-cover`) behind a fixed warm `scrim` and a subtle `noise` layer. On `prefers-reduced-motion` the video is paused (the first frame remains visible).
-- **Focus CTA** — round primary button fixed bottom-center (`aria-label="Start a focus session"`). Opens the setup sheet; focus returns to the CTA when the sheet closes.
+- **Focus CTA** — primary pill labelled *Start focus* with a play icon, fixed bottom-center (`aria-label="Start a focus session"`; `size="xl"` for a 44px tap target). Opens the setup sheet; focus returns to the CTA when the sheet closes.
 - **Greeting** — above the CTA: the last task name saved from setup, otherwise a time-of-day greeting (`Good morning` / `Good afternoon` / `Good evening`).
-- **Zen Mode** — a single toggle pinned to the right edge. Fades the header, rail, CTA and greeting to `0.25` opacity (the greeting keeps a `0.55` base when Zen is off). Faded chrome stays interactive so Zen can be turned off again. Ephemeral — not persisted.
-- **Header** — transparent, floating: logo on the left; History and Settings buttons on the right, each opening a dialog.
+- **Zen Mode** — a ghost icon toggle (eye / eye-off, with a hover tooltip) in the header's top-right button group. Fades the header, CTA and greeting to `0.25` opacity (the greeting keeps a `0.55` base when Zen is off). Faded chrome stays interactive so Zen can be turned off again. Ephemeral — not persisted.
+- **Header** — transparent, floating: logo on the left; on the right a `ButtonGroup` of icon buttons (History, Settings, Zen Mode), each labelled by a hover tooltip. History and Settings open dialogs.
 
 ## 2. Setup sheet (`FocusSetupSheet`)
 
@@ -19,8 +19,9 @@ A shadcn `Sheet` (`side="bottom"`) opened by the Focus CTA.
 - **Task (optional)** — free-text input, attached to the session. Empty → `Focus Session`. A non-empty value is saved as `lastTaskName` and shown on the idle screen next time.
 - **Mode** — toggle: *Open Focus* (counts up) or *Target Focus* (counts down).
 - **Duration** (Target only) — presets `25 / 50 / 90` or **Custom** (1–600 minutes, numeric input). Invalid custom values show an inline `FieldError` and block Start.
+- **Finish message** (Target only) — optional custom body for the finish notification, capped at 100 characters (live counter). Prefilled from `settings.completionMessage`; a small bell button beside it previews the notification and asks for permission on first use.
 - **No environment picker.** Start silently applies `settings.lastEnvironmentId` when *Remember last environment* is on, otherwise the first environment (`quiet`). The resulting `musicId` / `backgroundId` pair is recorded on the session.
-- **Start Focus** — creates the session, saves `lastTaskName` (when non-empty) and `lastEnvironmentId` (when remembering), requests notification permission, and closes the sheet. It does **not** start audio playback.
+- **Start Focus** — creates the session, saves `lastTaskName` (when non-empty), `completionMessage` (Target only) and `lastEnvironmentId` (when remembering), requests notification permission, and closes the sheet. It does **not** start audio playback.
 - The form mounts with persisted settings as initial state (`useState` lazy initializers) and is gated on settings hydration (`Skeleton` while waiting).
 
 ## 3. Focus timer (`FocusTimer`)
@@ -76,7 +77,7 @@ Opened from the header.
 
 ## 8. Notifications
 
-When a Target session reaches zero, a browser `Notification` ("Focus complete") is fired if permission is granted — once per session, best-effort, never blocking the in-app target-reached dialog.
+When a Target session reaches zero, a browser `Notification` ("Focus complete") is fired if permission is granted — once per session, best-effort, never blocking the in-app target-reached dialog. Its body is the session's custom finish message, or `You've reached your N-minute focus target.` when none was set. The bell button beside the setup field requests permission (when still `default`) and shows a preview.
 
 ## 9. Persistence
 
@@ -90,3 +91,4 @@ All local, via zustand `persist` → `localStorage`:
 
 - Desktop-first; the session UI works on mobile (controls wrap, timer scales with `clamp()`).
 - Keyboard-navigable with visible focus rings; `aria` labels on icon buttons; dialogs have titles; `prefers-reduced-motion` pauses the background video and removes motion/zen transitions; tabular numerals prevent timer jitter.
+- **Custom scrollbars** — thin accent-colored pills (`--primary` tinted with `color-mix`), applied globally in `globals.css`: `::-webkit-scrollbar` for Blink/WebKit, with `scrollbar-width`/`scrollbar-color` gated behind `@supports not selector(::-webkit-scrollbar)` so Firefox gets the standard path without Chromium ignoring the WebKit one.
