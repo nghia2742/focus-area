@@ -3,17 +3,20 @@
 import { useState } from "react";
 import type { FocusSession } from "@/types/focus";
 import { useFocusStore } from "@/store/focusStore";
-import { FocusSetup } from "@/components/focus/FocusSetup";
-import { FocusScreen } from "@/components/focus/FocusScreen";
+import { FocusTimer } from "@/components/focus/FocusTimer";
 import { SessionComplete } from "@/components/focus/SessionComplete";
 import { SiteHeader } from "@/components/layout/SiteHeader";
+import { SetupLayer } from "@/components/home/SetupLayer";
+import { FocusRail } from "@/components/home/FocusRail";
+import { ZenFade } from "@/components/home/ZenFade";
 import { MainBackground } from "@/components/media/MainBackground";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
- * The single page of the app. Shows the immersive focus screen whenever a
- * session is active (the header floats above it), otherwise the setup form.
- * History and Settings live in dialogs.
+ * The single page of the app. The room artwork always fills the screen; the
+ * setup chrome (CTA + sheet) swaps to the inline timer when a session is
+ * active — the session never leaves the main screen. The navbar and the
+ * top-right rail persist throughout and share the Zen Mode fade.
  */
 export function HomeView() {
   const session = useFocusStore((s) => s.session);
@@ -24,10 +27,11 @@ export function HomeView() {
     return (
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-5 py-12">
         <Skeleton className="h-9 w-48" />
-        <Skeleton className="h-10 w-full rounded-xl" />
-        <Skeleton className="h-10 w-full rounded-xl" />
-        <Skeleton className="h-40 w-full rounded-2xl" />
-        <Skeleton className="h-11 w-full rounded-xl" />
+        <div className="ml-auto flex flex-col items-center gap-1.5 pr-3 pt-2">
+          <Skeleton className="size-9 rounded-md" />
+          <Skeleton className="size-9 rounded-md" />
+          <Skeleton className="size-9 rounded-md" />
+        </div>
       </div>
     );
   }
@@ -38,9 +42,14 @@ export function HomeView() {
 
   return (
     <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
-      {!session && <SetupBackground />}
-      <SiteHeader overlay={!!session} />
-      {session ? <FocusScreen onComplete={handleComplete} /> : <FocusSetup />}
+      <MainBackground />
+      <ZenFade>
+        <SiteHeader />
+      </ZenFade>
+      <ZenFade>
+        <FocusRail />
+      </ZenFade>
+      {session ? <FocusTimer onComplete={handleComplete} /> : <SetupLayer />}
 
       {completed && (
         <SessionComplete
@@ -50,9 +59,4 @@ export function HomeView() {
       )}
     </div>
   );
-}
-
-/** Full-bleed artwork behind the setup screen (never during a session). */
-function SetupBackground() {
-  return <MainBackground />;
 }

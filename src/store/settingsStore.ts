@@ -7,17 +7,22 @@ import { DEFAULT_SETTINGS } from "@/lib/storage/localStorage";
 
 interface SettingsState {
   settings: AppSettings;
+  /** Zen Mode: fades the app chrome to 0.25 opacity. Ephemeral, not persisted. */
+  zenMode: boolean;
   hydrated: boolean;
   update: (partial: Partial<AppSettings>) => void;
+  setZenMode: (zenMode: boolean) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
       settings: DEFAULT_SETTINGS,
+      zenMode: false,
       hydrated: false,
       update: (partial) =>
         set((state) => ({ settings: { ...state.settings, ...partial } })),
+      setZenMode: (zenMode) => set({ zenMode }),
     }),
     {
       name: "focus-settings",

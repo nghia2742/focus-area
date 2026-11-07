@@ -96,6 +96,8 @@ export interface AppSettings {
   musicVolume: number;
   rememberLastEnvironment: boolean;
   lastEnvironmentId?: string;
+  /** Last task entered in Focus Setup — shown on the idle screen when set. */
+  lastTaskName?: string;
 }
 
 /** User's choices when launching a new focus session. */
