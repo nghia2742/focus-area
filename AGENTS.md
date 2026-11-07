@@ -75,7 +75,7 @@ npx tsc --noEmit # typecheck (needs .next/types to exist — run dev/build once 
 
 ## Stack
 
-- Next.js 16.3.0 (App Router), React 19, TypeScript 5, Tailwind CSS v4 (`@import "tailwindcss"` + `@theme` in `src/app/globals.css`).
+- Next.js 16.4.x (App Router), React 19, TypeScript 5, Tailwind CSS v4 (`@import "tailwindcss"` + `@theme` in `src/app/globals.css`).
 - State: zustand 5 with `persist` (localStorage) — one store per domain.
 - Styling: **shadcn/ui** — style `radix-nova`, primitives vendored in `src/components/ui/` (built on `radix-ui`), design tokens in `src/app/globals.css`, `lucide-react` icons, `sonner` toasts, `next-themes` for theming. Follow [UI rules](#ui-rules--shadcn-first-tokens-only-non-negotiable) for every UI change.
 - MCP servers: `playwright` (`browser_*` — browser verification) and `shadcn` (`shadcn_*` — registry search, component docs/examples, add commands). Use the shadcn tools instead of guessing component APIs.
@@ -84,12 +84,12 @@ npx tsc --noEmit # typecheck (needs .next/types to exist — run dev/build once 
 
 ```
 src/app/layout.tsx        html/body shell + Providers (next-themes, ThemeSync, Toaster)
-src/app/page.tsx          the ONLY route: SiteHeader + HomeView  (no /focus /history /settings routes)
-src/components/home/HomeView.tsx   <MainBackground/> + <FocusRail/> + (session ? <FocusTimer/> : <SetupLayer/>) + SessionComplete overlay
+src/app/page.tsx          the ONLY route: <HomeView/>  (no /focus /history /settings routes)
+src/components/home/HomeView.tsx   <MainBackground/> + ZenFade(<SiteHeader/>) + ZenFade(<FocusRail/>) + (session ? <FocusTimer/> : <SetupLayer/>) + SessionComplete dialog
 src/components/home/SetupLayer.tsx   idle chrome: FocusCta → FocusSetupSheet (setup form), IdleCenterContent, ZenFade
 src/components/focus/FocusTimer.tsx  immersive timer screen (timer, controls, dialogs)
-src/components/focus/FocusSetupSheet.tsx  the setup sheet (task, mode, duration, environment)
-src/components/timer/TimerDisplay.tsx  the isolated ticking render (useNow + useFocusTimer)
+src/components/focus/FocusSetupSheet.tsx  the setup sheet (task, mode, duration, start; no environment picker)
+src/components/timer/TimerDisplay.tsx  the ticking render (useNow + useFocusTimer)
 src/components/layout/SiteHeader.tsx   header w/ History & Settings buttons → dialogs
 src/components/history/*   HistoryDialog: FocusStats, WeekChart, SessionList, SessionItem
 src/components/settings/SettingsDialog.tsx
@@ -105,11 +105,11 @@ History and Settings are **dialogs**, not routes. The focus session renders on `
 ## Conventions & rules
 
 - **Timer is timestamp-derived, never a counter.** All elapsed values come from `ActiveSession` timestamps (`startedAt`, `pausedAt`, `totalPausedDuration`, `overtimeSince`) computed by the pure engine in `src/lib/timer/timer.ts`. Never introduce `setInterval(() => seconds++, 1000)`.
-- **Keep the ticking render isolated.** `useNow(500)` + `useFocusTimer` are consumed only by `TimerDisplay` so the rest of the app never re-renders every tick.
+- **Keep the ticking render isolated.** `useNow(500)` + `useFocusTimer` are consumed only by `TimerDisplay`, `FocusTimer` and `TargetReached`, so the rest of the app never re-renders every tick.
 - **Gate on hydration.** Every zustand store exposes a `hydrated` flag set in `onRehydrateStorage`. Components that render persisted state must gate on it (show `Skeleton`) to avoid SSR/client mismatches. Do not "fix" this with effect-sync — use lazy initial state from the store after the hydration gate.
-- **Music must start inside the Start Focus click gesture** (browser autoplay rules). `musicPlayer` is a module-level singleton (outside React) so playback survives navigation and can be driven from the gesture.
-- **Environments are pairs.** Music and background are coupled via `src/data/environments.ts`; picking an environment sets both `musicId` and `backgroundId`. Do not reintroduce separate music/background pickers.
-- **Full-bleed layout gotcha.** `height: 100%` does NOT resolve against a parent whose height comes from `flex-grow` (it falls back to auto — this caused a real "video only fills part of the screen" bug). Use `flex-1` on the flex item and `absolute inset-0` for full-bleed layers (`BackgroundRenderer` and the focus content layer both use `absolute inset-0`).
+- **Music playback is currently unwired.** `musicPlayer` is a module-level singleton (outside React) and only the Settings volume slider calls it — no track is selected or played. If you reconnect it, start playback inside the Start Focus click gesture (browser autoplay rules).
+- **Environments are pairs in data only.** Music and background are coupled via `src/data/environments.ts`; setup applies the remembered pair (or `quiet`) and records both ids on the session. There is no picker yet; keep any future picker paired rather than reintroducing separate music/background pickers.
+- **Full-bleed layout gotcha.** `height: 100%` does NOT resolve against a parent whose height comes from `flex-grow` (it falls back to auto — this caused a real "video only fills part of the screen" bug). Use `flex-1` on the flex item and `absolute inset-0` for full-bleed layers (`MainBackground` and the focus content layer both use `absolute inset-0`).
 - **Persistence.** zustand persist keys: `focus-active-session`, `focus-settings`, `focus-history`. The legacy `src/lib/storage/localStorage.ts` helpers (`getSettings`/`saveSessions`/etc.) are mostly unused — only `DEFAULT_SETTINGS` is imported from it. Do not dual-write.
 - **Settings migration.** `lastMusicId`/`lastBackgroundId`/`rememberLastMusic`/`rememberLastBackground` were replaced by `rememberLastEnvironment` + `lastEnvironmentId`. Old persisted values are ignored automatically — do not add back the old keys.
 - **Don't kill the MCP node processes** — they back the `playwright_browser_*` and `shadcn_*` tools. For one-off browser verification use `playwright-core` installed with `--no-save`, then remove it.

@@ -23,8 +23,8 @@ IDLE ──────────────────► RUNNING ───
         getDerivedStatus  │  └────────────────────┘                     │
         (target elapsed)  ▼                                            ▼
                      TARGET_REACHED ── enterOvertime() ──► OVERTIME ──► complete
-                          │                                              
-        complete() ──────┘  (both TARGET_REACHED and OVERTIME can complete)
+                          │
+        complete() ───────┘  (both TARGET_REACHED and OVERTIME can complete)
 ```
 
 Persisted records use `SessionStatus = "completed" | "cancelled"`; the live status enum is `"running" | "paused" | "target_reached" | "overtime"`.
@@ -36,8 +36,8 @@ Persisted records use `SessionStatus = "completed" | "cancelled"`; the live stat
 | `createSession(config, now)` | Builds an `ActiveSession`, status `running`; empty task → `DEFAULT_TASK_NAME`. |
 | `getElapsedMs(session, now)` | `now - startedAt - totalPausedDuration`, minus the current pause interval while paused. Floor at 0. |
 | `getActualDurationSec` / `getRemainingSec` | Seconds from elapsed / remaining ms. Remaining uses `ceil` so a countdown shows the whole second. |
-| `getDerivedStatus(session, now)` | While `running` + target + `elapsed >= target*1000` → `target_reached`. This is **derived**, not stored — the state flips even if the tab was closed over the target. |
-| `getOvertimeSec` | `now - overtimeSince` (0 when not in overtime). |
+| `getDerivedStatus(session, now)` | While `running` + target + `elapsed >= target*1000` → `target_reached`. This is **derived**, not stored — the state flips even if the tab was closed over the target. A paused session stays paused until resumed. |
+| `getOvertimeMs` / `getOvertimeSec` | `now - overtimeSince`, clamped at 0; 0 when not in overtime. |
 | `pauseSession` | No-op unless `running`; sets `pausedAt`. |
 | `resumeSession` | No-op unless `paused`; folds the pause interval into `totalPausedDuration`, clears `pausedAt`, re-checks `getDerivedStatus` (a target elapsed while away surfaces as `target_reached`). |
 | `enterOvertime` | Target only; `status = "overtime"`, `overtimeSince ?? now` (kept stable if re-entered). |
@@ -47,7 +47,7 @@ Persisted records use `SessionStatus = "completed" | "cancelled"`; the live stat
 ### Formats (`src/lib/timer/format.ts`)
 
 - `formatTimer` — `MM:SS`, `H:MM:SS` once ≥ 1 h.
-- `formatClock` — always `HH:MM:SS` (Open mode).
+- `formatClock` — always `HH:MM:SS` (Open mode, dialogs).
 - `formatOvertime` — `+MM:SS` / `+H:MM:SS`.
 - `formatDurationCompact` / `formatDurationShort` — `1h 27m` / `45m` / `32s`.
 - `formatDayGroup` / `formatTime` / `formatDayShort` — history grouping + labels.
@@ -55,11 +55,12 @@ Persisted records use `SessionStatus = "completed" | "cancelled"`; the live stat
 
 ## 2. Hooks
 
-- `useFocusTimer()` — subscribes to the active session and `useNow(500)`, then derives `status`, `elapsedSec`, `remainingSec`, `overtimeSec`, `elapsedMs`. Consumers re-render every tick; **only `TimerDisplay` uses it**.
+- `useFocusTimer()` — subscribes to the active session and `useNow(500)`, then derives `status`, `elapsedSec`, `remainingSec`, `overtimeSec`, `elapsedMs`. Consumers re-render every tick; **only `TimerDisplay`, `TargetReached` and `FocusTimer` use it**.
 - `useNow(intervalMs)` — stateful epoch ms refreshed on an interval.
 - `useReferenceNow()` — "now" captured once at mount; used by read-only History components so day/time grouping is stable and render bodies stay pure.
-- `useMusicPlayer()` — subscribes a component to the `musicPlayer` singleton (see below).
 - `usePrefersReducedMotion()` — tracks the `prefers-reduced-motion` media query.
+
+There is no `useMusicPlayer` hook; no component subscribes to audio state today.
 
 ## 3. Stores (`src/store/*`)
 
@@ -71,22 +72,25 @@ Persist key `focus-active-session`; `partialize` persists **only `session`** (th
 
 - `start(config)` — guarded (no-op if a session already exists, preventing double-start).
 - `pause` / `resume` / `enterOvertime` — delegate to the timer engine with `Date.now()`.
-- `complete()` — builds the record via the engine, pushes it into `useHistoryStore`, clears the session.
-- `discard()` — clears without saving.
-- `setEnvironment({musicId, backgroundId})` — swaps the pair on the live session.
+- `complete()` — builds the record via the engine, pushes it into `useHistoryStore`, clears the session, returns the record.
+- `discard()` — clears without saving (no current UI calls it).
+- `setEnvironment({musicId, backgroundId})` — swaps the pair on the live session (no current UI calls it).
 
-### `settingsStore` — preferences
+### `settingsStore` — preferences + Zen Mode
 
-Persist key `focus-settings`; defaults from `DEFAULT_SETTINGS` in `src/lib/storage/localStorage.ts`.
+Persist key `focus-settings`; `partialize` persists **only `settings`** — `zenMode` is ephemeral and always off on load. Defaults come from `DEFAULT_SETTINGS` in `src/lib/storage/localStorage.ts`.
 
 ```
 theme: "dark", defaultMode: "target", defaultDuration: 50,
-musicVolume: 0.6, rememberLastEnvironment: true, lastEnvironmentId?
+musicVolume: 0.6, rememberLastEnvironment: true,
+lastEnvironmentId?, lastTaskName?
 ```
+
+`update(partial)` shallow-merges settings; `setZenMode(bool)` drives `ZenFade` and the rail toggle.
 
 ### `historyStore` — completed sessions
 
-Persist key `focus-history`. `addSession` prepends; `clearSessions` wipes.
+Persist key `focus-history`. `addSession` prepends; `clearSessions` wipes (no current UI calls it).
 
 ## 4. Persistence & migration
 
@@ -96,20 +100,18 @@ Persist key `focus-history`. `addSession` prepends; `clearSessions` wipes.
 
 ## 5. Audio (`src/lib/audio/musicPlayer.ts`)
 
-Module-level singleton (`export const musicPlayer`) — one `HTMLAudioElement`, created lazily, looped, owned outside React so it survives component lifecycle and can be driven from the Start gesture.
+Module-level singleton (`export const musicPlayer`) — one looped `HTMLAudioElement`, created lazily, owned outside React.
 
-- `setTrack(id)` — no-op if unchanged; `undefined` stops/clears. `play()` failures (autoplay rejection on cold restore) are swallowed and surfaced via `isPlaying = false`.
-- `toggle` / `play` / `pause` / `setVolume` / `retry` / `stop`.
-- `error` flag (from the `audio` element's `error` event) → `MusicPlayer` renders the `Music unavailable` pill with a retry button. Audio failure never touches the timer.
-- React binds to it via `useMusicPlayer` (subscribe → `forceUpdate` reducer).
+- API: `setTrack` / `play` / `pause` / `toggle` / `setVolume` / `retry` / `stop`, plus `isPlaying` / `error` / `trackId` getters and a `subscribe` listener set.
+- **Not wired to the UI yet.** No component calls `setTrack` or `play`; the only caller is the Settings volume slider (`setVolume`). Sessions record `musicId`, but no audio starts on Start Focus or anywhere else. The autoplay-on-gesture contract in the original spec is therefore not currently exercised.
+- `setTrack` failures (autoplay rejection / missing file) are swallowed and surfaced via `error` / `isPlaying`; audio can never touch the timer.
 
-Autoplay contract: the audio is (re)started inside `FocusSetup.handleStart` — i.e. directly in the click gesture.
+## 6. Background (`src/components/media/MainBackground.tsx`)
 
-## 6. Backgrounds (`BackgroundRenderer`)
-
-- Video `h-full w-full object-cover` + poster; falls back to the static `<img>` on `onError` or when `prefers-reduced-motion` is on.
-- Dark gradient overlay (`from-black/40 via-black/25 to-black/60`) keeps the timer readable.
-- `absolute inset-0` within the `relative flex-1` focus root — see the full-bleed layout note in `AGENTS.md`.
+- Fixed full-bleed video: `/backgrounds/270507_small.mp4`, `autoPlay muted loop playsInline`, `object-cover`, inside `absolute inset-0 z-0`.
+- Pauses when `prefers-reduced-motion` is on and resumes when it turns off.
+- Overlays the `scrim` utility (warm gradient) and a `noise` film-grain layer.
+- There is no per-environment `BackgroundRenderer`; `backgroundId` is recorded but not rendered.
 
 ## 7. Stats (`src/lib/stats.ts`)
 
@@ -118,9 +120,11 @@ Autoplay contract: the audio is (re)started inside `FocusSetup.handleStart` — 
 
 ## 8. Notifications (`src/lib/notifications.ts`)
 
-- `requestNotificationPermission()` — best-effort, called from the Start gesture.
-- `notifyTargetReached(minutes)` — fires only when permission is `granted`; wrapped in try/catch and never blocking.
+- `requestNotificationPermission()` — best-effort, called from the Start Focus gesture.
+- `notifyTargetReached(minutes)` — fires only when permission is `granted`; wrapped in try/catch and never blocking. `FocusTimer` dedupes it per session id.
 
 ## 9. Environments & data
 
-`src/data/environments.ts` defines the pairs; `src/data/music.ts` and `src/data/backgrounds.ts` hold the current single track and video, referenced by id. `getEnvironment` / `getMusicTrack` / `getBackground` resolve ids → objects (undefined-safe).
+`src/data/environments.ts` defines the pairs; `src/data/music.ts` and `src/data/backgrounds.ts` hold the current tracks/backgrounds, referenced by id. `getEnvironment` / `getMusicTrack` / `getBackground` resolve ids → objects (undefined-safe), and `getEnvironmentVisual` builds a thumbnail-or-gradient card visual.
+
+The data is currently consumed only by `FocusSetupSheet` (to resolve the remembered pair) and `musicPlayer` (track lookup). No picker, background renderer, or card grid exists yet, so `getEnvironmentVisual` has no caller.
