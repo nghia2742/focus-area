@@ -101,7 +101,7 @@ src/components/
   media/            BackgroundRenderer, MusicPlayer, EnvironmentSelector
   layout/           SiteHeader
   timer/            TimerDisplay
-  ui/               shadcn-style primitives (button, dialog, field, toggle-group, …)
+  ui/               shadcn-style primitives (button, chart, dialog, field, toggle-group, …)
 src/store/          focusStore, settingsStore, historyStore
 src/lib/
   timer/            timer.ts (pure engine), format.ts

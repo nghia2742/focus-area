@@ -5,6 +5,7 @@ import { ClockIcon } from "lucide-react";
 import { FocusSetupSheet } from "@/components/focus/FocusSetupSheet";
 import { ZenFade } from "@/components/home/ZenFade";
 import { IdleCenterContent } from "@/components/home/IdleCenterContent";
+import { Button } from "@/components/ui/button";
 
 /**
  * The home-screen setup chrome when no session is active: the round Focus
@@ -41,19 +42,19 @@ interface FocusCtaProps {
 }
 
 /**
- * Round Start Focus CTA — the one solid-accent element, deliberately distinct
- * from the flat rail so it reads as the primary action.
+ * Round Start Focus CTA — the one solid-accent element on the idle screen, so
+ * it reads as the primary action.
  */
 function FocusCta({ ref, onOpen }: FocusCtaProps & { ref: React.Ref<HTMLButtonElement> }) {
   return (
-    <button
+    <Button
       ref={ref}
       type="button"
       onClick={onOpen}
       aria-label="Start a focus session"
-      className="fixed bottom-8 left-1/2 z-30 flex size-16 -translate-x-1/2 items-center justify-center rounded-full bg-accent-orange text-accent-orange-foreground shadow-[0_8px_24px_rgba(244,169,79,0.35),inset_0_1px_0_rgba(255,255,255,0.25)] outline-none transition-[background-color,transform,box-shadow] duration-200 hover:scale-105 hover:bg-accent-orange-hover hover:shadow-[0_8px_28px_rgba(244,169,79,0.45),inset_0_1px_0_rgba(255,255,255,0.25)] active:scale-95 focus-visible:ring-3 focus-visible:ring-white/40"
+      className="fixed bottom-8 left-1/2 z-30 size-16 -translate-x-1/2 rounded-full shadow-lg"
     >
       <ClockIcon className="size-7" />
-    </button>
+    </Button>
   );
 }

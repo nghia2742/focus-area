@@ -21,18 +21,14 @@ export function TimerDisplay() {
     return (
       <div className="flex flex-col items-center gap-3">
         <div className="flex flex-col items-center gap-1">
-          <span className="text-[0.7rem] font-medium tracking-[0.3em] text-white/50 uppercase">
-            Target
-          </span>
-          <span className="font-tabular text-4xl font-semibold text-white/60 sm:text-5xl">
+          <span className="text-xs font-medium text-artwork-ink-muted">Target</span>
+          <span className="font-tabular text-4xl font-semibold text-artwork-ink-muted sm:text-5xl">
             {formatTimer((session.targetDuration ?? 0) * 60)}
           </span>
         </div>
         <div className="flex flex-col items-center gap-1">
-          <span className="text-[0.7rem] font-medium tracking-[0.3em] text-accent-vivid uppercase">
-            Overtime
-          </span>
-          <span className="font-tabular ember-glow text-7xl font-bold text-accent-vivid sm:text-8xl">
+          <span className="text-xs font-medium text-primary">Overtime</span>
+          <span className="font-tabular ember-glow text-7xl font-bold text-primary sm:text-8xl">
             {formatOvertime(overtimeSec)}
           </span>
         </div>
@@ -49,7 +45,7 @@ export function TimerDisplay() {
     : 0;
 
   return (
-    <span className="font-tabular ember-glow relative inline-block text-[clamp(3.5rem,17vw,11rem)] leading-none font-bold tracking-tight">
+    <span className="font-tabular ember-glow relative inline-block text-[clamp(3.5rem,17vw,11rem)] leading-none font-bold tracking-tight text-artwork-ink">
       {isTarget && status !== "target_reached" ? (
         <TimerRing progress={progress}>{mainTime}</TimerRing>
       ) : (
@@ -66,7 +62,7 @@ function TimerRing({ progress, children }: { progress: number; children: ReactNo
   const clamped = Math.min(1, Math.max(0, progress));
 
   return (
-    <span className="relative grid aspect-square place-items-center p-[28px] text-accent-vivid sm:p-[32px]">
+    <span className="relative grid aspect-square place-items-center p-[28px] text-primary sm:p-[32px]">
       <svg
         viewBox="0 0 100 100"
         className="pointer-events-none absolute inset-0 h-full w-full -rotate-90"
@@ -79,7 +75,7 @@ function TimerRing({ progress, children }: { progress: number; children: ReactNo
           fill="none"
           stroke="currentColor"
           strokeOpacity="0.14"
-          strokeWidth="1"
+          strokeWidth="2"
         />
         <circle
           cx="50"
@@ -88,13 +84,13 @@ function TimerRing({ progress, children }: { progress: number; children: ReactNo
           fill="none"
           stroke="currentColor"
           strokeLinecap="round"
-          strokeWidth="1"
+          strokeWidth="2"
           strokeDasharray={circumference}
           strokeDashoffset={circumference * (1 - clamped)}
           className="transition-[stroke-dashoffset] duration-1000 ease-linear"
         />
       </svg>
-      <span className="relative text-[oklch(0.95_0.012_70)]">{children}</span>
+      <span className="relative text-artwork-ink">{children}</span>
     </span>
   );
 }

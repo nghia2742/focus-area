@@ -21,7 +21,7 @@ export function IdleCenterContent() {
   return (
     <ZenFade baseOpacity={0.55}>
       <motion.p
-        className="pointer-events-none fixed bottom-[clamp(7.5rem,28vh,13.5rem)] left-1/2 z-30 -translate-x-1/2 max-w-[min(80vw,28rem)] truncate px-4 font-heading text-base font-medium tracking-tight text-white sm:text-lg"
+        className="pointer-events-none fixed bottom-[clamp(7.5rem,28vh,13.5rem)] left-1/2 z-30 -translate-x-1/2 max-w-[min(80vw,28rem)] truncate px-4 font-heading text-lg font-medium tracking-tight text-artwork-ink sm:text-xl"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={reduceMotion ? { duration: 0 } : { duration: 0.5, ease: "easeOut" }}

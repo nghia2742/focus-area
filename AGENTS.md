@@ -24,7 +24,7 @@ Ponytail sets scope and size — it never overrides the UI rules, timer/hydratio
 
 The design system is `components.json` (style `radix-nova`, baseColor `neutral`, icon library `lucide`) plus the tokens in `src/app/globals.css`. Do not build a parallel style layer: no bespoke buttons, inputs, cards, dialogs, chips, empty states or spinners.
 
-**1. Look before you write.** Installed primitives live in `src/components/ui/`: `badge`, `button`, `card`, `dialog`, `empty`, `field`, `input`, `label`, `separator`, `skeleton`, `slider`, `sonner`, `switch`, `toggle-group`, `toggle`, `tooltip`. Read the actual file before using it — this style is `radix-nova` (radix-ui + `asChild`), and the API differs from older shadcn docs (`FieldGroup`/`Field`/`FieldLabel`, `ToggleGroup`, `CardAction`, `Button size="icon-sm"`, icons via `data-icon`).
+**1. Look before you write.** Installed primitives live in `src/components/ui/`: `badge`, `button`, `card`, `chart`, `dialog`, `empty`, `field`, `input`, `label`, `separator`, `sheet`, `skeleton`, `slider`, `sonner`, `switch`, `toggle-group`, `toggle`, `tooltip`. Read the actual file before using it — this style is `radix-nova` (radix-ui + `asChild`), and the API differs from older shadcn docs (`FieldGroup`/`Field`/`FieldLabel`, `ToggleGroup`, `CardAction`, `Button size="icon-sm"`, icons via `data-icon`).
 
 **2. Compose, don't reinvent.**
 
@@ -39,8 +39,8 @@ The design system is `components.json` (style `radix-nova`, baseColor `neutral`,
 
 - Forbidden in feature code: raw palette (`bg-white`, `text-black`, `bg-zinc-900`, `text-emerald-600`, `border-slate-700`), arbitrary values (`bg-[#…]`, `text-[oklch(…)]`), and manual `dark:` color overrides.
 - Need a new color? Add `--token` to `:root` **and** `.dark`, then expose `--color-token` in the `@theme inline` block. Never inline the value at the call site.
-- The only raw-color zone is the immersive artwork layer, and it is already packaged as utilities in `globals.css`: `glass`, `glass-deep`, `glass-card`, `scrim`, `ember-glow`, `noise`, `ambient-glow`, `text-glow`, `font-tabular`. Use them by name; don't copy their `white/10` / `bg-black/35` values into new components.
-- Known debt: `src/components/focus/FocusSetupSheet.tsx` and `FocusTimer.tsx` still hardcode `red-*` for error/stop states — migrate them to `destructive` tokens when you touch those files; don't add new `red-*`. `SetupLayer.tsx`'s `FocusCta` is a deliberately bespoke pill button (the single accent CTA) — leave it alone unless redesigning that interaction.
+- The only raw-color zone is the immersive artwork layer, and it is already packaged as utilities in `globals.css`: `artwork-surface`, `scrim`, `ember-glow`, `noise`, `font-tabular`, plus the fixed `artwork-*` tokens (`text-artwork-ink`, `text-artwork-ink-muted`, `border-artwork-line`, `bg-artwork-veil`). Use them by name; don't copy their raw `white/10` / `bg-black/35` values into new components. Chrome over the artwork uses `artwork-*` tokens so it does not flip with the light/dark theme.
+- Known debt: `src/components/ui/*` primitives are vendored baseline shared by every screen — edit only as a last resort (see rule 5). The bespoke pieces are gone: the setup form is a shadcn `Sheet`, the Focus CTA is a shadcn `Button`, dialog chrome uses default `Dialog` tokens, and history charts use the shadcn `chart` primitives.
 
 **4. `className` is for layout, not restyling.** Spacing via `flex gap-*` (never `space-x-*`/`space-y-*`), equal dimensions via `size-*`, clipping via `truncate`, conditional classes via `cn()`.
 
@@ -93,7 +93,7 @@ src/components/timer/TimerDisplay.tsx  the isolated ticking render (useNow + use
 src/components/layout/SiteHeader.tsx   header w/ History & Settings buttons → dialogs
 src/components/history/*   HistoryDialog: FocusStats, WeekChart, SessionList, SessionItem
 src/components/settings/SettingsDialog.tsx
-src/components/media/*     MainBackground (full-bleed artwork layer), MusicPlayer
+src/components/media/*     MainBackground (full-bleed artwork layer)
 src/store/                 focusStore (active session), settingsStore, historyStore
 src/lib/timer/timer.ts     pure timestamp-based timer engine (no React/DOM)
 src/lib/audio/musicPlayer.ts   module-singleton audio controller

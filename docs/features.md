@@ -49,8 +49,8 @@ Selection always applies the pair. During a session, "Change environment" swaps 
 
 Opened from the header. Empty state → CTA. Otherwise:
 
-- **Stats grid** — Today, Yesterday, This week, Sessions (count), Average, Longest (all in seconds-derived compact durations).
-- **Last 7 days chart** — bar chart of focus seconds per day, with tooltips (min 4% height so empty days still render).
+- **Stats card** — Today, Yesterday, This week, Sessions (count), Average, Longest (all in seconds-derived compact durations).
+- **Last 7 days chart** — shadcn `ChartContainer` bar chart (Recharts) of focus seconds per day, with a duration-formatted tooltip.
 - **Session list** — grouped by day (`Today` / `Yesterday` / weekday-date), each row shows task name, mode badge (`Target · 50m` / `Open`), date + time, and compact duration.
 
 ## 6. Settings (`SettingsDialog`)

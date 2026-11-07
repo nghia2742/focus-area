@@ -60,12 +60,12 @@ export function HistoryDialog({ open, onOpenChange }: HistoryDialogProps) {
           </Empty>
         ) : (
           <div className="grid min-h-0 flex-1 overflow-y-auto lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:overflow-hidden">
-            <div className="flex flex-col gap-6 px-6 py-6 lg:min-h-0 lg:overflow-y-auto lg:border-r lg:border-border">
+            <div className="flex flex-col gap-6 px-6 py-6 lg:min-h-0 lg:overflow-y-auto">
               <FocusStats sessions={sessions} />
               <WeekChart sessions={sessions} />
             </div>
-            <div className="flex min-h-0 flex-col border-t border-border px-6 py-6 lg:border-t-0 lg:border-l-0">
-              <div className="mb-3 flex shrink-0 items-baseline justify-between gap-3">
+            <div className="flex min-h-0 flex-col gap-3 px-6 py-6">
+              <div className="flex shrink-0 items-baseline justify-between gap-3">
                 <h2 className="text-sm font-medium text-muted-foreground">Sessions</h2>
                 <span className="text-xs text-muted-foreground">
                   {sessions.length} total

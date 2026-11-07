@@ -39,10 +39,10 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --color-accent-vivid: var(--accent-vivid);
-  --color-accent-orange: #f4a94f;
-  --color-accent-orange-hover: #f7b968;
-  --color-accent-orange-foreground: #1a1200;
+  --color-artwork-ink: var(--artwork-ink);
+  --color-artwork-ink-muted: var(--artwork-ink-muted);
+  --color-artwork-veil: var(--artwork-veil);
+  --color-artwork-line: var(--artwork-line);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -67,7 +67,11 @@
   --muted-foreground: oklch(0.5 0.025 60);
   --accent: oklch(0.925 0.035 70);
   --accent-foreground: oklch(0.38 0.09 60);
-  --accent-vivid: oklch(0.66 0.15 58);
+  /* Fixed chrome palette for surfaces over the room artwork. Never themed. */
+  --artwork-ink: oklch(0.97 0.01 70);
+  --artwork-ink-muted: oklch(0.97 0.01 70 / 62%);
+  --artwork-veil: oklch(0.22 0.02 60 / 55%);
+  --artwork-line: oklch(1 0 0 / 14%);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.885 0.014 70);
   --input: oklch(0.885 0.014 70);
@@ -103,7 +107,6 @@
   --muted-foreground: oklch(0.7 0.02 65);
   --accent: oklch(0.27 0.04 70);
   --accent-foreground: oklch(0.93 0.04 70);
-  --accent-vivid: oklch(0.78 0.13 70);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 14%);
@@ -135,17 +138,9 @@
   }
 }
 
-/* Soft, rounded glass surfaces for the immersive screens. */
-@utility glass {
-  @apply bg-white/5 backdrop-blur-xl border border-white/10;
-  box-shadow: inset 0 1px 0 oklch(1 0 0 / 6%);
-}
-
-@utility glass-deep {
-  @apply border border-white/10 bg-black/35 backdrop-blur-2xl;
-  box-shadow:
-    inset 0 1px 0 oklch(1 0 0 / 8%),
-    0 24px 60px -24px oklch(0 0 0 / 0.6);
+/* Chrome that floats over the room artwork (rail, chip surfaces). */
+@utility artwork-surface {
+  @apply rounded-full border border-artwork-line bg-artwork-veil backdrop-blur-xl;
 }
 
 /* Warm scrim behind the setup screen so text stays readable on the artwork. */
@@ -158,43 +153,16 @@
   );
 }
 
-/* The dark glass container the setup form lives in. */
-@utility glass-card {
-  @apply border border-white/14 bg-[rgba(20,16,14,0.55)] backdrop-blur-2xl;
-  box-shadow:
-    0 24px 60px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 oklch(1 0 0 / 6%);
-}
-
-@utility text-glow {
-  text-shadow: 0 0 24px rgb(255 255 255 / 0.18);
-}
-
 /* Warm ember glow for the timer digits on the immersive screen. */
 @utility ember-glow {
   text-shadow:
-    0 0 24px oklch(0.78 0.13 70 / 0.28),
-    0 0 72px oklch(0.78 0.13 70 / 0.22);
+    0 0 24px color-mix(in oklch, var(--primary) 28%, transparent),
+    0 0 72px color-mix(in oklch, var(--primary) 22%, transparent);
 }
 
 /* Subtle film grain for the immersive surfaces. */
 @utility noise {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
-}
-
-/* Warm ambient glow behind the setup screen. */
-@utility ambient-glow {
-  background:
-    radial-gradient(
-      ellipse 60% 42% at 50% -8%,
-      oklch(0.78 0.13 70 / 0.14),
-      transparent 70%
-    ),
-    radial-gradient(
-      ellipse 45% 36% at 88% 108%,
-      oklch(0.66 0.15 58 / 0.08),
-      transparent 70%
-    );
 }
 
 /* Timer display: geometric tabular figures so digits don't jitter. */

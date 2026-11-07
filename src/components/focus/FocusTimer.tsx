@@ -101,12 +101,9 @@ export function FocusTimer({ onComplete }: FocusTimerProps) {
 
   return (
     <>
-      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-10 px-4 sm:gap-12">
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-10 px-4 sm:gap-14">
         {taskName && (
-          <span className="glass inline-flex max-w-md items-center gap-2 rounded-full px-4 py-1.5 text-sm text-white/90">
-            <span className="size-1.5 shrink-0 rounded-full bg-accent-vivid" />
-            <span className="truncate">{taskName}</span>
-          </span>
+          <p className="max-w-md truncate text-sm text-artwork-ink-muted">{taskName}</p>
         )}
 
         <TimerDisplay />
@@ -117,39 +114,39 @@ export function FocusTimer({ onComplete }: FocusTimerProps) {
             onKeepFocusing={() => enterOvertime()}
           />
         ) : (
-          <div className="flex flex-col items-center gap-3">
+          <div className="flex flex-col items-center gap-4">
             <div className="flex items-center gap-3">
               {(status === "running" || status === "paused") && (
                 <Button
-                  size="lg"
-                  className="h-12 min-w-40 gap-2 rounded-full bg-accent-orange px-7 text-base font-semibold text-accent-orange-foreground shadow-[0_8px_24px_rgba(244,169,79,0.28)] hover:bg-accent-orange-hover active:scale-[0.98]"
+                  size="xl"
+                  className="min-w-40 rounded-full"
                   onClick={() => (isPaused ? resume() : pause())}
                 >
                   {isPaused ? (
                     <>
-                      <PlayIcon className="size-5" />
+                      <PlayIcon data-icon="inline-start" />
                       Resume
                     </>
                   ) : (
                     <>
-                      <PauseIcon className="size-5" />
+                      <PauseIcon data-icon="inline-start" />
                       Pause
                     </>
                   )}
                 </Button>
               )}
               <Button
-                variant="ghost"
-                size="lg"
-                className="h-12 gap-2 rounded-full border border-red-400/50 bg-red-950/60 px-6 text-base font-medium text-red-100 backdrop-blur-sm hover:border-red-400/70 hover:bg-red-900/70 active:scale-[0.98]"
+                variant="destructive"
+                size="xl"
+                className="rounded-full"
                 onClick={() => setShowEndConfirm(true)}
               >
-                <SquareIcon className="size-5" />
+                <SquareIcon data-icon="inline-start" />
                 End Session
               </Button>
             </div>
-            <span className="hidden text-xs tracking-wide text-white/55 sm:inline">
-              Space · pause / resume
+            <span className="hidden text-xs text-artwork-ink-muted sm:inline">
+              Space to pause or resume
             </span>
           </div>
         )}
