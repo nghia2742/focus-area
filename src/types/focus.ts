@@ -87,10 +87,7 @@ export interface Environment {
   category?: "quiet" | "study" | "nature" | "rain" | "lofi";
 }
 
-export type ThemePreference = "dark" | "light" | "system";
-
 export interface AppSettings {
-  theme: ThemePreference;
   defaultMode: FocusMode;
   defaultDuration: number;
   musicVolume: number;

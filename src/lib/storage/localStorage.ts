@@ -7,7 +7,6 @@ export const STORAGE_KEYS = {
 } as const;
 
 export const DEFAULT_SETTINGS: AppSettings = {
-  theme: "dark",
   defaultMode: "target",
   defaultDuration: 50,
   musicVolume: 0.6,

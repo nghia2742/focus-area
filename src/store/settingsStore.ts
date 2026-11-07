@@ -11,6 +11,7 @@ interface SettingsState {
   zenMode: boolean;
   hydrated: boolean;
   update: (partial: Partial<AppSettings>) => void;
+  resetSettings: () => void;
   setZenMode: (zenMode: boolean) => void;
 }
 
@@ -22,6 +23,7 @@ export const useSettingsStore = create<SettingsState>()(
       hydrated: false,
       update: (partial) =>
         set((state) => ({ settings: { ...state.settings, ...partial } })),
+      resetSettings: () => set({ settings: DEFAULT_SETTINGS }),
       setZenMode: (zenMode) => set({ zenMode }),
     }),
     {

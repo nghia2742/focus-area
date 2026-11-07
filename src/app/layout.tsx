@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { appearanceScript } from "@/lib/appearance/prehydrate";
+import { DEFAULT_APPEARANCE } from "@/lib/appearance/presets";
 import "./globals.css";
 import { Providers } from "./providers";
 
@@ -31,9 +33,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       suppressHydrationWarning
+      data-style={DEFAULT_APPEARANCE.style}
+      data-base-color={DEFAULT_APPEARANCE.baseColor}
+      data-theme-color={DEFAULT_APPEARANCE.theme}
+      data-chart-color={DEFAULT_APPEARANCE.chartColor}
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="h-full flex flex-col overflow-hidden">
+        {/* Applies persisted appearance tokens before the first paint. */}
+        <script dangerouslySetInnerHTML={{ __html: appearanceScript }} />
         <Providers>{children}</Providers>
         <div
           aria-hidden
