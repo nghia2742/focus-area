@@ -11,8 +11,8 @@ import { PHASE_LABELS } from "@/features/pomodoro/config";
 import { phaseMs } from "@/features/pomodoro/machine";
 import { RoundDots } from "@/features/pomodoro/RoundDots";
 import { usePomodoro } from "@/features/pomodoro/usePomodoro";
-import { TimerRing } from "@/components/timer/TimerDisplay";
-import { EndConfirmDialog } from "@/components/focus/EndConfirmDialog";
+import { TimerRing } from "@/features/focus/TimerDisplay";
+import { EndConfirmDialog } from "@/features/focus/EndConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
 

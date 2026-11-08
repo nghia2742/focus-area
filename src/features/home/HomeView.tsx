@@ -3,11 +3,11 @@
 import { useState } from "react";
 import type { FocusSession } from "@/types/focus";
 import { useFocusStore } from "@/store/focusStore";
-import { FocusTimer } from "@/components/focus/FocusTimer";
-import { SessionComplete } from "@/components/focus/SessionComplete";
+import { FocusTimer } from "@/features/focus/FocusTimer";
+import { SessionComplete } from "@/features/focus/SessionComplete";
 import { SiteHeader } from "@/components/layout/SiteHeader";
-import { SetupLayer } from "@/components/home/SetupLayer";
-import { ZenFade } from "@/components/home/ZenFade";
+import { SetupLayer } from "@/features/home/SetupLayer";
+import { ZenFade } from "@/components/layout/ZenFade";
 import { MainBackground } from "@/components/media/MainBackground";
 import { Skeleton } from "@/components/ui/skeleton";
 

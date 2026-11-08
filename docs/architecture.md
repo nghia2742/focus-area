@@ -11,7 +11,7 @@ src/app/layout.tsx (shell + Providers)
         └── <HomeView/>               the whole page
 ```
 
-`HomeView` (`src/components/home/HomeView.tsx`):
+`HomeView` (`src/features/home/HomeView.tsx`):
 
 ```
 hydrated? ── no ──► Skeleton
@@ -107,19 +107,21 @@ persist rehydrates `session` (startedLocally is not persisted)
 
 ```
 src/app/            layout, page, providers, globals.css (Tailwind v4 theme)
-src/components/
-  home/             HomeView (page switch), SetupLayer, ZenFade
+src/features/
+  home/             HomeView (page switch), SetupLayer
   focus/            FocusTimer, FocusSetupSheet, TargetReached, EndConfirmDialog,
-                    SessionComplete, ActiveSessionRestore
+                    SessionComplete, ActiveSessionRestore, TimerDisplay
+  pomodoro/         machine, config, types, usePomodoro, store, PomodoroTimer,
+                    PomodoroSettings, RoundDots (see docs/specs/pomodoro-cycles.md)
   history/          HistoryDialog, FocusStats, WeekChart, SessionList, SessionItem
   settings/         SettingsDialog, AppearanceSettings, GeneralSettings
-  shared/           DurationField (presets + custom input, used by setup and settings)
-  media/            MainBackground
-  layout/           SiteHeader
-  providers/        AppearanceProvider (preset data attrs + next-themes color mode)
-  timer/            TimerDisplay
+src/components/
   ui/               shadcn-style primitives (button, chart, dialog, field, kbd, sheet,
                     toggle-group, toggle, tooltip, …)
+  layout/           SiteHeader, ZenFade
+  media/            MainBackground
+  providers/        AppearanceProvider (preset data attrs + next-themes color mode)
+  shared/           DurationField (presets + custom input, used by setup and settings)
 src/store/          focusStore, settingsStore, appearanceStore, historyStore
 src/lib/
   timer/            timer.ts (pure engine), format.ts

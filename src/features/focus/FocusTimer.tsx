@@ -8,11 +8,11 @@ import { useFocusTimer } from "@/hooks/useFocusTimer";
 import { notifyTargetReached } from "@/lib/notifications";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
-import { TimerDisplay } from "@/components/timer/TimerDisplay";
-import { TargetReached } from "@/components/focus/TargetReached";
-import { EndConfirmDialog } from "@/components/focus/EndConfirmDialog";
-import { ActiveSessionRestore } from "@/components/focus/ActiveSessionRestore";
-import { PomodoroTimer } from "@/components/focus/PomodoroTimer";
+import { TimerDisplay } from "@/features/focus/TimerDisplay";
+import { TargetReached } from "@/features/focus/TargetReached";
+import { EndConfirmDialog } from "@/features/focus/EndConfirmDialog";
+import { ActiveSessionRestore } from "@/features/focus/ActiveSessionRestore";
+import { PomodoroTimer } from "@/features/pomodoro/PomodoroTimer";
 
 interface FocusTimerProps {
   onComplete?: (record: FocusSession) => void;

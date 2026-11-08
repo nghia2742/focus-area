@@ -85,20 +85,27 @@ npx tsc --noEmit # typecheck (needs .next/types to exist — run dev/build once 
 ```
 src/app/layout.tsx        html/body shell + Providers (next-themes, ThemeSync, Toaster)
 src/app/page.tsx          the ONLY route: <HomeView/>  (no /focus /history /settings routes)
-src/components/home/HomeView.tsx   <MainBackground/> + ZenFade(<SiteHeader/>) + (session ? <FocusTimer/> : <SetupLayer/>) + SessionComplete dialog
-src/components/home/SetupLayer.tsx   idle chrome: FocusCta → FocusSetupSheet (setup form), ZenFade
-src/components/focus/FocusTimer.tsx  immersive timer screen (timer, controls, dialogs)
-src/components/focus/FocusSetupSheet.tsx  the setup sheet (task, mode, duration, start; no environment picker)
-src/components/timer/TimerDisplay.tsx  the ticking render (useNow + useFocusTimer)
-src/components/layout/SiteHeader.tsx   header: icon ButtonGroup (History, Settings, Zen Mode) → dialogs
-src/components/history/*   HistoryDialog: FocusStats, WeekChart, SessionList, SessionItem
-src/components/settings/SettingsDialog.tsx
+src/features/home/HomeView.tsx   <MainBackground/> + ZenFade(<SiteHeader/>) + (session ? <FocusTimer/> : <SetupLayer/>) + SessionComplete dialog
+src/features/home/SetupLayer.tsx   idle chrome: FocusCta → FocusSetupSheet (setup form), ZenFade
+src/features/focus/FocusTimer.tsx  immersive timer screen (Open/Target; delegates to PomodoroTimer)
+src/features/focus/FocusSetupSheet.tsx  the setup sheet (task, mode, duration, start; no environment picker)
+src/features/focus/TimerDisplay.tsx  the ticking render (useNow + useFocusTimer) + TimerRing
+src/features/pomodoro/PomodoroTimer.tsx  immersive Pomodoro screen (phase, round dots, skip/awaiting)
+src/features/pomodoro/*    machine.ts (pure), usePomodoro, RoundDots, PomodoroSettings, store, types, config
+src/features/history/*     HistoryDialog: FocusStats, WeekChart, SessionList, SessionItem
+src/features/settings/*    SettingsDialog: AppearanceSettings, GeneralSettings
+src/components/ui/*        vendored shadcn primitives
+src/components/layout/*    SiteHeader, ZenFade
 src/components/media/*     MainBackground (full-bleed artwork layer)
-src/store/                 focusStore (active session), settingsStore, historyStore
+src/components/shared/*    DurationField (presets + custom input)
+src/components/providers/* AppearanceProvider
+src/store/                 focusStore (active session), settingsStore, historyStore, appearanceStore
 src/lib/timer/timer.ts     pure timestamp-based timer engine (no React/DOM)
 src/lib/audio/musicPlayer.ts   module-singleton audio controller
 src/data/environments.ts   environment pairs (music + background always travel together)
 ```
+
+Feature UI lives in `src/features/<feature>/`; `src/components/` holds only cross-cutting UI (`ui`, `layout`, `media`, `shared`, `providers`).
 
 History and Settings are **dialogs**, not routes. The focus session renders on `/` when active; `SetupLayer` is shown otherwise.
 

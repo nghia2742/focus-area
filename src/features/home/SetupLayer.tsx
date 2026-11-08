@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { PlayIcon } from "lucide-react";
-import { FocusSetupSheet } from "@/components/focus/FocusSetupSheet";
-import { ZenFade } from "@/components/home/ZenFade";
+import { FocusSetupSheet } from "@/features/focus/FocusSetupSheet";
+import { ZenFade } from "@/components/layout/ZenFade";
 import { useHotkey } from "@/hooks/useHotkey";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";

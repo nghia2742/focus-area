@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { EyeIcon, EyeOffIcon, HistoryIcon, SettingsIcon } from "lucide-react";
-import { HistoryDialog } from "@/components/history/HistoryDialog";
-import { SettingsDialog } from "@/components/settings/SettingsDialog";
+import { HistoryDialog } from "@/features/history/HistoryDialog";
+import { SettingsDialog } from "@/features/settings/SettingsDialog";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useHotkey } from "@/hooks/useHotkey";
 import { Button } from "@/components/ui/button";
