@@ -41,7 +41,7 @@ Persisted records use `SessionStatus = "completed" | "cancelled"`; the live stat
 | `getOvertimeMs` / `getOvertimeSec` | `now - overtimeSince`, clamped at 0; 0 when not in overtime. |
 | `pauseSession` | No-op unless `running`; sets `pausedAt`. |
 | `resumeSession` | No-op unless `paused`; folds the pause interval into `totalPausedDuration`, clears `pausedAt`, re-checks `getDerivedStatus` (a target elapsed while away surfaces as `target_reached`). |
-| `enterOvertime` | Target only; `status = "overtime"`, `overtimeSince ?? now` (kept stable if re-entered). |
+| `enterOvertime` | Target only; `status = "overtime"`, `overtimeSince = startedAt + totalPausedDuration + targetDuration·60s` (the target boundary, so the chip matches elapsed), kept stable if re-entered. |
 | `completeSession` | Builds the `FocusSession` history record: `actualDuration`, `endedAt = now`, `status "completed"`, copies music/background ids. |
 | `isRunning` | `getDerivedStatus(...) === "running"`. |
 

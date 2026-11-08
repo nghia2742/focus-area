@@ -118,7 +118,7 @@ src/components/
   layout/           SiteHeader
   providers/        AppearanceProvider (preset data attrs + next-themes color mode)
   timer/            TimerDisplay
-  ui/               shadcn-style primitives (button, chart, dialog, field, sheet,
+  ui/               shadcn-style primitives (button, chart, dialog, field, kbd, sheet,
                     toggle-group, toggle, tooltip, …)
 src/store/          focusStore, settingsStore, appearanceStore, historyStore
 src/lib/
@@ -129,7 +129,7 @@ src/lib/
   stats.ts          computeStats, lastNDays
   notifications.ts  Notification helpers
   utils.ts          cn()
-src/hooks/          useFocusTimer, useNow, useReferenceNow, usePrefersReducedMotion
+src/hooks/          useFocusTimer, useHotkey, useNow, useReferenceNow, usePrefersReducedMotion
 src/data/           environments.ts, music.ts, backgrounds.ts
 src/types/          focus.ts (all shared types + constants)
 public/

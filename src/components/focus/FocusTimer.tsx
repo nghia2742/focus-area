@@ -7,6 +7,7 @@ import { useFocusStore } from "@/store/focusStore";
 import { useFocusTimer } from "@/hooks/useFocusTimer";
 import { notifyTargetReached } from "@/lib/notifications";
 import { Button } from "@/components/ui/button";
+import { Kbd } from "@/components/ui/kbd";
 import { TimerDisplay } from "@/components/timer/TimerDisplay";
 import { TargetReached } from "@/components/focus/TargetReached";
 import { EndConfirmDialog } from "@/components/focus/EndConfirmDialog";
@@ -145,8 +146,9 @@ export function FocusTimer({ onComplete }: FocusTimerProps) {
                 End Session
               </Button>
             </div>
-            <span className="hidden text-xs text-artwork-ink-muted sm:inline">
-              Space to pause or resume
+            <span className="hidden items-center gap-1.5 text-xs text-artwork-ink-muted sm:inline-flex">
+              <Kbd className="bg-artwork-veil text-artwork-ink">Space</Kbd>{" "}
+              to pause or resume
             </span>
           </div>
         )}

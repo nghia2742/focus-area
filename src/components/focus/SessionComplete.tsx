@@ -13,10 +13,18 @@ import {
 
 interface SessionCompleteProps {
   durationSec: number;
+  targetDuration?: number;
   onDone: () => void;
 }
 
-export function SessionComplete({ durationSec, onDone }: SessionCompleteProps) {
+export function SessionComplete({
+  durationSec,
+  targetDuration,
+  onDone,
+}: SessionCompleteProps) {
+  const targetSec = targetDuration ? targetDuration * 60 : 0;
+  const overtimeSec = targetSec ? Math.max(0, durationSec - targetSec) : 0;
+
   return (
     <Dialog open onOpenChange={(open) => !open && onDone()}>
       <DialogContent
@@ -33,7 +41,11 @@ export function SessionComplete({ durationSec, onDone }: SessionCompleteProps) {
           <p className="font-tabular text-xl font-medium text-primary">
             {formatDurationCompact(durationSec)}
           </p>
-          <DialogDescription>Nice work.</DialogDescription>
+          <DialogDescription>
+            {overtimeSec > 0
+              ? `${formatDurationCompact(targetSec)} target + ${formatDurationCompact(overtimeSec)} overtime`
+              : "Nice work."}
+          </DialogDescription>
         </DialogHeader>
         <Button className="w-full" onClick={onDone}>
           Done

@@ -56,7 +56,7 @@ export const useFocusStore = create<FocusState>()(
       enterOvertime: () => {
         const { session } = get();
         if (!session) return;
-        set({ session: engineEnterOvertime(session, Date.now()) });
+        set({ session: engineEnterOvertime(session) });
       },
 
       complete: () => {

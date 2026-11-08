@@ -20,7 +20,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 export function HomeView() {
   const session = useFocusStore((s) => s.session);
   const hydrated = useFocusStore((s) => s.hydrated);
-  const [completed, setCompleted] = useState<{ durationSec: number } | null>(null);
+  const [completed, setCompleted] = useState<{
+    durationSec: number;
+    targetDuration?: number;
+  } | null>(null);
 
   if (!hydrated) {
     return (
@@ -36,7 +39,10 @@ export function HomeView() {
   }
 
   const handleComplete = (record: FocusSession) => {
-    setCompleted({ durationSec: record.actualDuration });
+    setCompleted({
+      durationSec: record.actualDuration,
+      targetDuration: record.targetDuration,
+    });
   };
 
   return (
@@ -50,6 +56,7 @@ export function HomeView() {
       {completed && (
         <SessionComplete
           durationSec={completed.durationSec}
+          targetDuration={completed.targetDuration}
           onDone={() => setCompleted(null)}
         />
       )}

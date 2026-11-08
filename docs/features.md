@@ -7,9 +7,10 @@ Everything described here is implemented and lives on the single `/` route. Hist
 The app always sits on a full-bleed room artwork; the setup chrome floats over it.
 
 - **Artwork** — `MainBackground` loops `public/backgrounds/270507_small.mp4` (muted, `object-cover`) behind a fixed warm `scrim` and a subtle `noise` layer. On `prefers-reduced-motion` the video is paused (the current frame remains visible). A second fixed `noise` overlay in `layout.tsx` adds grain above the whole UI, including dialogs.
-- **Focus CTA** — primary pill labelled *Start focus* with a play icon, fixed bottom-center (`aria-label="Start a focus session"`; `size="xl"` for a 44px tap target). Opens the setup sheet; focus returns to the CTA when the sheet closes.
+- **Focus CTA** — primary pill labelled *Start focus* with a play icon, fixed bottom-center (`aria-label="Start a focus session"`; `size="xl"` for a 44px tap target). Opens the setup sheet; focus returns to the CTA when the sheet closes. A `Kbd` shortcut legend sits above it from `sm` up.
 - **Zen Mode** — a ghost icon toggle (eye / eye-off, with a hover tooltip) in the header's top-right button group. Fades the header and CTA to `0.25` opacity. Faded chrome stays interactive so Zen can be turned off again, and a hidden `aria-live` region announces the new state. Ephemeral — not persisted.
-- **Header** — transparent, floating: logo on the left; on the right a `ButtonGroup` of icon buttons (History, Settings, Zen Mode), each labelled by a hover tooltip. History and Settings open dialogs.
+- **Header** — transparent, floating: logo on the left; on the right a `ButtonGroup` of icon buttons (History, Settings, Zen Mode), each labelled by a hover tooltip that shows its `Kbd` key. History and Settings open dialogs.
+- **Keyboard shortcuts** — `F` opens the setup sheet (idle screen only), `S` opens Settings, `H` opens History, `Z` toggles Zen Mode. Single keys are ignored when a modifier is held, when focus is in an input/textarea/contenteditable, on key repeat, and while any dialog or sheet is open.
 
 ## 2. Setup sheet (`FocusSetupSheet`)
 
@@ -29,11 +30,11 @@ Rendered inline on `/` while a session is active — the room artwork stays behi
 
 - Optional task name above the timer (single line, truncated); `TimerDisplay` is the dominant element.
 - **Timer display** — Target counts down `MM:SS` (`H:MM:SS` past an hour, with a thin circular progress ring); Open counts up `HH:MM:SS`. Overtime shows the frozen target above a running `+MM:SS` readout. All values are timestamp-derived.
-- **Pause / Resume** and **End Session** controls (both hidden at `target_reached`, where the Target reached dialog replaces them). A `Space to pause or resume` hint is shown from `sm` up.
+- **Pause / Resume** and **End Session** controls (both hidden at `target_reached`, where the Target reached dialog replaces them). A `Kbd`-styled `Space to pause or resume` hint is shown from `sm` up.
 - **Keyboard shortcut** — `Space` / `K` toggles pause/resume, ignored while the end-confirm or restore dialog is open and while typing in an input, textarea or contenteditable.
 - **End confirm dialog** — shows elapsed time with *Keep Focusing* / *End Session*.
 - **Target reached dialog** — at countdown zero: *Finish Session* / *Keep Focusing*. Escape counts as *Keep Focusing*; outside interaction is blocked.
-- **Session complete dialog** — shown by `HomeView` after ending, with the recorded duration and *Done* (Escape or outside click also dismisses).
+- **Session complete dialog** — shown by `HomeView` after ending, with the recorded total duration; target sessions that ran into overtime also show a `target + overtime` breakdown. *Done* (Escape or outside click also dismisses).
 - **Restore dialog** — when a persisted session exists that was not started in this page view (e.g. after refresh/close): *Resume Session* / *End Session*. Title is *Paused session* when the restored session is paused, otherwise *Welcome back.* The timer keeps counting while the dialog is open if the restored session was running.
 
 ## 4. Timer behavior

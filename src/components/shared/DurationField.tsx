@@ -118,7 +118,7 @@ export const DurationField = forwardRef<DurationFieldHandle, DurationFieldProps>
               inputMode="numeric"
               aria-label="Custom duration in minutes"
               aria-invalid={error ? true : undefined}
-              placeholder="1-600 minutes"
+              placeholder="1-600m"
               value={customValue}
               autoFocus
               onChange={(event) => {

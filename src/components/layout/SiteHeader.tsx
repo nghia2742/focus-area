@@ -6,8 +6,10 @@ import { EyeIcon, EyeOffIcon, HistoryIcon, SettingsIcon } from "lucide-react";
 import { HistoryDialog } from "@/components/history/HistoryDialog";
 import { SettingsDialog } from "@/components/settings/SettingsDialog";
 import { useSettingsStore } from "@/store/settingsStore";
+import { useHotkey } from "@/hooks/useHotkey";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
+import { Kbd } from "@/components/ui/kbd";
 import {
   Tooltip,
   TooltipContent,
@@ -24,6 +26,10 @@ export function SiteHeader() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const zenMode = useSettingsStore((s) => s.zenMode);
   const setZenMode = useSettingsStore((s) => s.setZenMode);
+
+  useHotkey("h", () => setHistoryOpen(true));
+  useHotkey("s", () => setSettingsOpen(true));
+  useHotkey("z", () => setZenMode(!zenMode));
 
   return (
     <header className="absolute inset-x-0 top-0 z-40 flex items-center justify-between px-4 py-3 sm:px-6">
@@ -51,7 +57,9 @@ export function SiteHeader() {
               <HistoryIcon />
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="bottom">History</TooltipContent>
+          <TooltipContent side="bottom">
+            History <Kbd>H</Kbd>
+          </TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -65,7 +73,9 @@ export function SiteHeader() {
               <SettingsIcon />
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="bottom">Settings</TooltipContent>
+          <TooltipContent side="bottom">
+            Settings <Kbd>S</Kbd>
+          </TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -80,7 +90,9 @@ export function SiteHeader() {
               {zenMode ? <EyeOffIcon /> : <EyeIcon />}
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="bottom">Zen Mode — fade the interface</TooltipContent>
+          <TooltipContent side="bottom">
+            <span>Zen Mode — fade the interface</span> <Kbd>Z</Kbd>
+          </TooltipContent>
         </Tooltip>
       </ButtonGroup>
 

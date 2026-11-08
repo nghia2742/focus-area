@@ -98,9 +98,19 @@ export function resumeSession(session: ActiveSession, now: number): ActiveSessio
 }
 
 /** From target_reached, the user chooses to keep going — enter overtime. */
-export function enterOvertime(session: ActiveSession, now: number): ActiveSession {
-  if (session.mode !== "target") return session;
-  return { ...session, status: "overtime", overtimeSince: session.overtimeSince ?? now };
+export function enterOvertime(session: ActiveSession): ActiveSession {
+  if (session.mode !== "target" || session.targetDuration == null) return session;
+  // Overtime starts at the target boundary, not when the dialog is dismissed,
+  // so the overtime chip matches the total elapsed time in the end dialog.
+  const targetReachedAt =
+    session.startedAt +
+    session.totalPausedDuration +
+    session.targetDuration * 60_000;
+  return {
+    ...session,
+    status: "overtime",
+    overtimeSince: session.overtimeSince ?? targetReachedAt,
+  };
 }
 
 /** Build the persisted FocusSession record at completion time. */
