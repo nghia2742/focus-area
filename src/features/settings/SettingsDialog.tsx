@@ -24,8 +24,8 @@ const SECTIONS: {
   label: string;
   icon: typeof PaletteIcon;
 }[] = [
-  { value: "appearance", label: "Appearance", icon: PaletteIcon },
   { value: "general", label: "General", icon: Settings2Icon },
+  { value: "appearance", label: "Appearance", icon: PaletteIcon },
 ];
 
 interface SettingsDialogProps {
