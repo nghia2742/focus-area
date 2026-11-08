@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { BellIcon, PlayIcon, TimerIcon, TimerOffIcon } from "lucide-react";
 import { toast } from "sonner";
 import type { FocusMode } from "@/types/focus";
-import { FOCUS_DURATION_PRESETS, MAX_COMPLETION_MESSAGE_LENGTH } from "@/types/focus";
+import { MAX_COMPLETION_MESSAGE_LENGTH } from "@/types/focus";
 import { ENVIRONMENTS, getEnvironment } from "@/data/environments";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useFocusStore } from "@/store/focusStore";
@@ -12,11 +12,14 @@ import {
   previewCompletionNotification,
   requestNotificationPermission,
 } from "@/lib/notifications";
+import {
+  DurationField,
+  type DurationFieldHandle,
+} from "@/components/shared/DurationField";
 import { Button } from "@/components/ui/button";
 import {
   Field,
   FieldDescription,
-  FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
@@ -35,8 +38,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-
-type DurationChoice = "25" | "50" | "90" | "custom";
 
 interface FocusSetupSheetProps {
   open: boolean;
@@ -84,34 +85,19 @@ function SheetFormInner({ onStart }: { onStart: () => void }) {
 
   const [taskName, setTaskName] = useState("");
   const [mode, setMode] = useState<FocusMode>(settings.defaultMode);
-  const [durationChoice, setDurationChoice] = useState<DurationChoice>(() => {
-    const preset = FOCUS_DURATION_PRESETS.find((p) => p === settings.defaultDuration);
-    return preset ? (String(preset) as DurationChoice) : "custom";
+  const [targetDuration, setTargetDuration] = useState(() => {
+    const minutes = settings.defaultDuration;
+    return Number.isInteger(minutes) && minutes >= 1 && minutes <= 600 ? minutes : 50;
   });
-  const [customMinutes, setCustomMinutes] = useState(() =>
-    FOCUS_DURATION_PRESETS.includes(settings.defaultDuration)
-      ? ""
-      : String(settings.defaultDuration),
-  );
-  const [durationError, setDurationError] = useState<string | null>(null);
   const [finishMessage, setFinishMessage] = useState(
     () => settings.completionMessage ?? "",
   );
-
-  const resolvedDuration = (): number | null => {
-    if (mode !== "target") return null;
-    if (durationChoice === "custom") {
-      const n = Number.parseInt(customMinutes, 10);
-      if (!Number.isFinite(n) || n < 1 || n > 600) return null;
-      return n;
-    }
-    return Number.parseInt(durationChoice, 10);
-  };
+  const durationRef = useRef<DurationFieldHandle>(null);
 
   /** Asks for permission (if needed) and shows the finish notification. */
   const handlePreviewMessage = async () => {
     const result = await previewCompletionNotification(
-      resolvedDuration() ?? settings.defaultDuration,
+      targetDuration,
       finishMessage,
     );
     if (result === "granted") {
@@ -125,16 +111,15 @@ function SheetFormInner({ onStart }: { onStart: () => void }) {
     }
   };
 
-  const handleStart = () => {
-    let targetDuration: number | undefined;
+  const handleStart = (minutes = targetDuration) => {
+    let target: number | undefined;
     let completionMessage: string | undefined;
     if (mode === "target") {
-      const d = resolvedDuration();
-      if (d == null) {
-        setDurationError("Enter a duration between 1 and 600 minutes.");
-        return;
-      }
-      targetDuration = d;
+      const resolved = durationRef.current
+        ? durationRef.current.validate()
+        : minutes;
+      if (resolved == null) return;
+      target = resolved;
       completionMessage = finishMessage.trim() || undefined;
     }
 
@@ -148,13 +133,12 @@ function SheetFormInner({ onStart }: { onStart: () => void }) {
     startSession({
       taskName,
       mode,
-      targetDuration,
+      targetDuration: target,
       completionMessage,
       musicId: environment.musicId,
       backgroundId: environment.backgroundId,
     });
 
-    if (taskName.trim()) update({ lastTaskName: taskName.trim() });
     if (mode === "target") update({ completionMessage: completionMessage ?? "" });
     if (settings.rememberLastEnvironment) update({ lastEnvironmentId: environment.id });
 
@@ -188,10 +172,7 @@ function SheetFormInner({ onStart }: { onStart: () => void }) {
             aria-label="Focus mode"
             value={mode}
             onValueChange={(v) => {
-              if (v) {
-                setMode(v as FocusMode);
-                setDurationError(null);
-              }
+              if (v) setMode(v as FocusMode);
             }}
             className="w-full"
           >
@@ -208,54 +189,13 @@ function SheetFormInner({ onStart }: { onStart: () => void }) {
 
         {mode === "target" && (
           <>
-            <Field data-invalid={durationError ? true : undefined}>
-              <FieldLabel>Duration</FieldLabel>
-              <ToggleGroup
-                type="single"
-                variant="outline"
-                size="lg"
-                aria-label="Target duration"
-                value={durationChoice}
-                onValueChange={(v) => {
-                  if (v) setDurationChoice(v as DurationChoice);
-                  setDurationError(null);
-                }}
-                className="w-full"
-              >
-                {FOCUS_DURATION_PRESETS.map((d) => (
-                  <ToggleGroupItem key={d} value={String(d)} className="flex-1">
-                    {d}m
-                  </ToggleGroupItem>
-                ))}
-                <ToggleGroupItem value="custom" className="flex-1">
-                  Custom
-                </ToggleGroupItem>
-              </ToggleGroup>
-
-              {durationChoice === "custom" && (
-                <>
-                  <Input
-                    type="number"
-                    min={1}
-                    max={600}
-                    inputMode="numeric"
-                    aria-label="Custom duration in minutes"
-                    aria-invalid={durationError ? true : undefined}
-                    placeholder="45"
-                    value={customMinutes}
-                    onChange={(e) => {
-                      setCustomMinutes(e.target.value);
-                      setDurationError(null);
-                    }}
-                    onKeyDown={(e) => e.key === "Enter" && handleStart()}
-                    autoFocus
-                  />
-                  <FieldDescription>1–600 minutes.</FieldDescription>
-                </>
-              )}
-
-              <FieldError>{durationError}</FieldError>
-            </Field>
+            <DurationField
+              ref={durationRef}
+              label="Duration"
+              value={targetDuration}
+              onChange={setTargetDuration}
+              onSubmit={handleStart}
+            />
 
             <Field>
               <FieldLabel htmlFor="completion-message">
@@ -302,7 +242,7 @@ function SheetFormInner({ onStart }: { onStart: () => void }) {
         )}
       </FieldGroup>
 
-      <Button size="xl" className="w-full" onClick={handleStart}>
+      <Button size="xl" className="w-full" onClick={() => handleStart()}>
         Start Focus
         <PlayIcon data-icon="inline-end" />
       </Button>

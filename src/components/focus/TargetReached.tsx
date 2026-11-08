@@ -32,7 +32,7 @@ export function TargetReached({ onFinish, onKeepFocusing }: TargetReachedProps) 
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
       >
-        <span className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+        <span className="flex size-12 justify-self-center items-center justify-center rounded-2xl bg-primary/10 text-primary">
           <SparklesIcon className="size-6" aria-hidden />
         </span>
         <DialogHeader className="items-center gap-1.5">

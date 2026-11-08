@@ -11,7 +11,8 @@ Pure, dependency-free module. No React, no DOM, no `Date.now()` inside functions
 ```
 id, taskName, mode ("open" | "target"), targetDuration?, status,
 startedAt, pausedAt (null | epoch ms), totalPausedDuration (ms),
-overtimeSince (null | epoch ms), musicId?, backgroundId?, createdAt
+overtimeSince (null | epoch ms), musicId?, backgroundId?,
+completionMessage?, createdAt
 ```
 
 ### State machine
@@ -81,12 +82,16 @@ Persist key `focus-active-session`; `partialize` persists **only `session`** (th
 Persist key `focus-settings`; `partialize` persists **only `settings`** — `zenMode` is ephemeral and always off on load. Defaults come from `DEFAULT_SETTINGS` in `src/lib/storage/localStorage.ts`.
 
 ```
-theme: "dark", defaultMode: "target", defaultDuration: 50,
+defaultMode: "target", defaultDuration: 50,
 musicVolume: 0.6, rememberLastEnvironment: true,
-lastEnvironmentId?, lastTaskName?
+lastEnvironmentId?, completionMessage: ""
 ```
 
 `update(partial)` shallow-merges settings; `setZenMode(bool)` drives `ZenFade` and the rail toggle.
+
+### `appearanceStore` — visual presets
+
+Persist key `focus-appearance`; stores `style`, `baseColor`, `theme`, `chartColor` only (defaults from `DEFAULT_APPEARANCE` in `src/lib/appearance/presets.ts`). Every field is validated on merge with `is*` guards, falling back per field. `resetAppearance()` restores the defaults. Color mode is **not** here — it lives in `next-themes` and is composed with this store in `AppearanceProvider`.
 
 ### `historyStore` — completed sessions
 
@@ -94,8 +99,8 @@ Persist key `focus-history`. `addSession` prepends; `clearSessions` wipes (no cu
 
 ## 4. Persistence & migration
 
-- zustand `createJSONStorage(() => localStorage)`. Keys: `focus-active-session`, `focus-settings`, `focus-history`.
-- **Migration:** `lastMusicId` / `lastBackgroundId` / `rememberLastMusic` / `rememberLastBackground` were replaced by `rememberLastEnvironment` + `lastEnvironmentId`. Old keys in persisted JSON are simply ignored by the store shape — no migration code runs.
+- zustand `createJSONStorage(() => localStorage)`. Keys: `focus-active-session`, `focus-settings`, `focus-appearance`, `focus-history`, plus `theme` owned by `next-themes`.
+- **Migration:** `lastMusicId` / `lastBackgroundId` / `rememberLastMusic` / `rememberLastBackground` were replaced by `rememberLastEnvironment` + `lastEnvironmentId`. Old keys in persisted JSON are simply ignored by the store shape — no migration code runs. Appearance values are validated on merge (`isAppearanceStyle` / `isBaseColor` / `isPaletteColor`), so unknown ids fall back to defaults; `appearanceScript` in `layout.tsx` applies the persisted appearance before first paint.
 - The helpers in `src/lib/storage/localStorage.ts` (`getSettings`, `saveSessions`, `getActiveSession`, …) use older keys (`focus:settings`, etc.) and are **not** used by the stores — only `DEFAULT_SETTINGS` is imported. Do not dual-write through them.
 
 ## 5. Audio (`src/lib/audio/musicPlayer.ts`)

@@ -86,7 +86,7 @@ npx tsc --noEmit # typecheck (needs .next/types to exist — run dev/build once 
 src/app/layout.tsx        html/body shell + Providers (next-themes, ThemeSync, Toaster)
 src/app/page.tsx          the ONLY route: <HomeView/>  (no /focus /history /settings routes)
 src/components/home/HomeView.tsx   <MainBackground/> + ZenFade(<SiteHeader/>) + (session ? <FocusTimer/> : <SetupLayer/>) + SessionComplete dialog
-src/components/home/SetupLayer.tsx   idle chrome: FocusCta → FocusSetupSheet (setup form), IdleCenterContent, ZenFade
+src/components/home/SetupLayer.tsx   idle chrome: FocusCta → FocusSetupSheet (setup form), ZenFade
 src/components/focus/FocusTimer.tsx  immersive timer screen (timer, controls, dialogs)
 src/components/focus/FocusSetupSheet.tsx  the setup sheet (task, mode, duration, start; no environment picker)
 src/components/timer/TimerDisplay.tsx  the ticking render (useNow + useFocusTimer)

@@ -11,7 +11,6 @@ export const DEFAULT_SETTINGS: AppSettings = {
   defaultDuration: 50,
   musicVolume: 0.6,
   rememberLastEnvironment: true,
-  lastTaskName: "",
   completionMessage: "",
 };
 

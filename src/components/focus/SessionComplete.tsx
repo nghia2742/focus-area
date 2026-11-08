@@ -23,7 +23,7 @@ export function SessionComplete({ durationSec, onDone }: SessionCompleteProps) {
         showCloseButton={false}
         className="gap-6 items-center p-8 text-center"
       >
-        <span className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+        <span className="flex size-14 justify-self-center items-center justify-center rounded-2xl bg-primary/10 text-primary">
           <CheckCircleIcon className="size-7" aria-hidden />
         </span>
         <DialogHeader className="items-center gap-1.5">

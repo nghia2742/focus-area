@@ -52,22 +52,21 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
           <nav className="border-b p-3 sm:border-r sm:border-b-0">
             <ToggleGroup
               type="single"
-              orientation="vertical"
               aria-label="Settings sections"
               value={section}
               onValueChange={(value) => {
                 if (value === "appearance" || value === "general") setSection(value);
               }}
-              className="w-full gap-1"
+              className="w-full gap-1 sm:flex-col"
             >
               {SECTIONS.map((item) => (
                 <ToggleGroupItem
                   key={item.value}
                   value={item.value}
-                  className="h-9 w-full justify-start gap-2 px-3"
+                  className="h-9 flex-1 gap-2 px-3 sm:w-full sm:flex-none sm:justify-start"
                 >
                   <item.icon data-icon="inline-start" />
-                  {item.label}
+                  <span className="sr-only sm:not-sr-only">{item.label}</span>
                 </ToggleGroupItem>
               ))}
             </ToggleGroup>

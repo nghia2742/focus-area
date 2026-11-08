@@ -3,14 +3,13 @@
 import { useState } from "react";
 import { Volume2Icon } from "lucide-react";
 import type { FocusMode } from "@/types/focus";
-import { FOCUS_DURATION_PRESETS } from "@/types/focus";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useAppearance } from "@/components/providers/AppearanceProvider";
 import { musicPlayer } from "@/lib/audio/musicPlayer";
 import { DEFAULT_SETTINGS } from "@/lib/storage/localStorage";
+import { DurationField } from "@/components/shared/DurationField";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
@@ -19,31 +18,11 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 export function GeneralSettings() {
   const { settings, update, resetSettings } = useSettingsStore();
   const { resetAppearance } = useAppearance();
-  const [customDuration, setCustomDuration] = useState(() =>
-    FOCUS_DURATION_PRESETS.includes(settings.defaultDuration)
-      ? ""
-      : String(settings.defaultDuration),
-  );
   const [confirmingReset, setConfirmingReset] = useState(false);
-
-  const handleDefaultDuration = (minutes: number) => {
-    setCustomDuration("");
-    update({ defaultDuration: minutes });
-  };
-
-  const handleCustomDurationBlur = () => {
-    const n = Number.parseInt(customDuration, 10);
-    if (Number.isFinite(n) && n >= 1 && n <= 600) {
-      update({ defaultDuration: n });
-    } else {
-      setCustomDuration(String(settings.defaultDuration));
-    }
-  };
 
   const handleResetAll = () => {
     resetSettings();
     resetAppearance();
-    setCustomDuration("");
     setConfirmingReset(false);
     musicPlayer.setVolume(DEFAULT_SETTINGS.musicVolume);
   };
@@ -83,50 +62,13 @@ export function GeneralSettings() {
           </ToggleGroup>
         </Field>
 
-        <Field>
-          <FieldLabel>Default target duration</FieldLabel>
-          <div className="flex flex-col gap-2">
-            <ToggleGroup
-              type="single"
-              aria-label="Default target duration"
-              value={
-                FOCUS_DURATION_PRESETS.includes(settings.defaultDuration)
-                  ? String(settings.defaultDuration)
-                  : "custom"
-              }
-              onValueChange={(value) => {
-                if (value && value !== "custom") handleDefaultDuration(Number(value));
-              }}
-              variant="outline"
-              className="w-full"
-            >
-              {FOCUS_DURATION_PRESETS.map((duration) => (
-                <ToggleGroupItem
-                  key={duration}
-                  value={String(duration)}
-                  className="flex-1"
-                >
-                  {duration}m
-                </ToggleGroupItem>
-              ))}
-              <ToggleGroupItem value="custom" className="flex-1">
-                Custom
-              </ToggleGroupItem>
-            </ToggleGroup>
-            {!FOCUS_DURATION_PRESETS.includes(settings.defaultDuration) && (
-              <Input
-                type="number"
-                min={1}
-                max={600}
-                inputMode="numeric"
-                aria-label="Custom default duration in minutes"
-                value={customDuration}
-                onChange={(event) => setCustomDuration(event.target.value)}
-                onBlur={handleCustomDurationBlur}
-              />
-            )}
-          </div>
-        </Field>
+        {settings.defaultMode === "target" && (
+          <DurationField
+            label="Default target duration"
+            value={settings.defaultDuration}
+            onChange={(defaultDuration) => update({ defaultDuration })}
+          />
+        )}
       </section>
 
       <Separator />

@@ -20,7 +20,7 @@ hydrated? ── no ──► Skeleton
 <ZenFade><SiteHeader/></ZenFade>        logo + Zen Mode / History / Settings
 session active?
    ├─ yes ──► <FocusTimer onComplete={...}/>   inline timer over the artwork
-   ├─ no  ──► <SetupLayer/>                    CTA + greeting + setup sheet
+   ├─ no  ──► <SetupLayer/>                    CTA + setup sheet
 completed? ── yes ──► <SessionComplete/> dialog
 ```
 
@@ -43,7 +43,6 @@ The idle screen instead renders:
 ```
 SetupLayer
 ├── ZenFade > FocusCta           bottom-center "Start focus" pill → opens sheet
-├── IdleCenterContent            greeting / last task name (ZenFade, base 0.55)
 └── FocusSetupSheet              bottom Sheet (task, mode, duration, start)
 ```
 
@@ -53,9 +52,10 @@ SetupLayer
 | --- | --- | --- |
 | Active session lifecycle | `useFocusStore` | `focus-active-session` |
 | Preferences + ephemeral Zen Mode | `useSettingsStore` | `focus-settings` |
+| Appearance presets (style, base, theme, chart) | `useAppearanceStore` | `focus-appearance` |
 | Completed sessions | `useHistoryStore` | `focus-history` |
 
-Cross-store: `useFocusStore.complete()` writes into `useHistoryStore`. `useSettingsStore` is read by setup/screen/header/rail via `useSettingsStore((s) => s.settings...)` or `s.zenMode`.
+Cross-store: `useFocusStore.complete()` writes into `useHistoryStore`. `useSettingsStore` is read by setup/screen/header/rail via `useSettingsStore((s) => s.settings...)` or `s.zenMode`. Color mode is owned by `next-themes`, composed with `useAppearanceStore` in `AppearanceProvider`.
 
 Audio state is **not** in a store — the module singleton `musicPlayer` exists, but nothing subscribes to it and no component starts playback.
 
@@ -66,8 +66,8 @@ Audio state is **not** in a store — the module singleton `musicPlayer` exists,
 ```
 validate (custom duration 1–600) →
 environment = getEnvironment(remembered lastEnvironmentId) ?? ENVIRONMENTS[0] →
-startSession({ taskName, mode, targetDuration, musicId, backgroundId })  [focusStore]
-save lastTaskName (when non-empty) / lastEnvironmentId (when remembering) [settingsStore]
+startSession({ taskName, mode, targetDuration, completionMessage, musicId, backgroundId })  [focusStore]
+save completionMessage (Target only) / lastEnvironmentId (when remembering) [settingsStore]
 requestNotificationPermission()
 → HomeView re-renders (session set) → FocusTimer
 ```
@@ -108,20 +108,22 @@ persist rehydrates `session` (startedLocally is not persisted)
 ```
 src/app/            layout, page, providers, globals.css (Tailwind v4 theme)
 src/components/
-  home/             HomeView (page switch), SetupLayer, IdleCenterContent,
-                    ZenFade
+  home/             HomeView (page switch), SetupLayer, ZenFade
   focus/            FocusTimer, FocusSetupSheet, TargetReached, EndConfirmDialog,
                     SessionComplete, ActiveSessionRestore
   history/          HistoryDialog, FocusStats, WeekChart, SessionList, SessionItem
-  settings/         SettingsDialog
+  settings/         SettingsDialog, AppearanceSettings, GeneralSettings
+  shared/           DurationField (presets + custom input, used by setup and settings)
   media/            MainBackground
   layout/           SiteHeader
+  providers/        AppearanceProvider (preset data attrs + next-themes color mode)
   timer/            TimerDisplay
   ui/               shadcn-style primitives (button, chart, dialog, field, sheet,
                     toggle-group, toggle, tooltip, …)
-src/store/          focusStore, settingsStore, historyStore
+src/store/          focusStore, settingsStore, appearanceStore, historyStore
 src/lib/
   timer/            timer.ts (pure engine), format.ts
+  appearance/       presets.ts (ids/labels/defaults), prehydrate.ts (blocking script)
   audio/            musicPlayer.ts (singleton, currently unwired)
   storage/          legacy localStorage helpers (DEFAULT_SETTINGS only)
   stats.ts          computeStats, lastNDays
@@ -140,6 +142,6 @@ public/
 
 ## Theming & motion
 
-- `next-themes` (attribute `class`, `defaultTheme="dark"`, `enableSystem={false}`) + `Providers.tsx`. `ThemeSync` mirrors `settings.theme` into `next-themes` after hydration.
-- `motion` (Framer Motion) drives `ZenFade` and the greeting fade, respecting `prefers-reduced-motion`.
-- CSS variables in `globals.css` define light/dark tokens plus fixed `--artwork-*` tokens for chrome over the video. Custom utilities: `artwork-surface`, `scrim`, `ember-glow`, `noise`, `font-tabular`.
+- `next-themes` (attribute `class`, `defaultTheme="dark"`, `enableSystem`) + `Providers.tsx`. Color mode is owned by `next-themes` and driven from Settings → Appearance; `AppearanceProvider` also mirrors `style` / `baseColor` / `theme` / `chartColor` onto `<html data-*>` after hydration, while `appearanceScript` applies the persisted values before first paint.
+- `motion` (Framer Motion) drives `ZenFade`, respecting `prefers-reduced-motion`.
+- CSS variables in `globals.css` define light/dark tokens, palette blocks keyed by `data-*`, plus fixed `--artwork-*` tokens for chrome over the video. Custom utilities: `artwork-surface`, `scrim`, `ember-glow`, `noise`, `font-tabular`.

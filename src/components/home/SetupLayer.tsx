@@ -4,15 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { PlayIcon } from "lucide-react";
 import { FocusSetupSheet } from "@/components/focus/FocusSetupSheet";
 import { ZenFade } from "@/components/home/ZenFade";
-import { IdleCenterContent } from "@/components/home/IdleCenterContent";
 import { Button } from "@/components/ui/button";
 
 /**
  * The home-screen setup chrome when no session is active: the bottom-center
- * Focus CTA pill that opens the Focus Setup sheet, plus the idle greeting
- * above it. Both fade with Zen Mode (the greeting keeps its own 0.55 base so
- * opacity never stacks). The sheet itself is not wrapped, so it keeps full
- * opacity when open.
+ * Focus CTA pill that opens the Focus Setup sheet. It fades with Zen Mode. The
+ * sheet itself is not wrapped, so it keeps full opacity when open.
  */
 export function SetupLayer() {
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -31,7 +28,6 @@ export function SetupLayer() {
       <ZenFade>
         <FocusCta ref={ctaRef} onOpen={() => setSheetOpen(true)} />
       </ZenFade>
-      <IdleCenterContent />
       <FocusSetupSheet open={sheetOpen} onOpenChange={setSheetOpen} />
     </>
   );
