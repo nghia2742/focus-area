@@ -15,7 +15,7 @@ Source of truth for the current feature set. Row numbers (`#N`) are stable ident
 | 9 | Notifications | Sends a notification when a Target session reaches its goal, with a custom or default message; in Pomodoro mode, also notifies on each phase change; lets users preview the notification. | Reminds users when a focus goal is completed. |
 | 10 | Focus History | Lists completed sessions with task, mode, time, and duration; Pomodoro sessions record focused time only and completed rounds. | Lets users look back at their focus activity. |
 | 11 | Focus Statistics | Summarizes time for today, yesterday, and this week, plus session count, average duration, and longest session. | Helps users assess their focus habits. |
-| 12 | Focus Chart | Shows focus time for the last 7 days. | Shows progress day by day. |
+| 12 | Focus Chart | Shows focus time for the last 7 days as stacked bars broken down by mode (Open, Target, Pomodoro), with a legend. | Shows progress day by day and how focus time splits across modes. |
 | 13 | Appearance Settings | Choose light, dark, or system theme; customize display style and colors. | Creates an experience that matches personal taste. |
 | 14 | Default Session Settings | Choose the default mode and duration for new sessions, including Pomodoro focus, break, and round settings. | Saves time when starting each session. |
 | 15 | Sound Settings | Adjust the default volume and remember the last-used environment. | Manages sound options for the focus experience. |

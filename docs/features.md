@@ -64,7 +64,7 @@ Rendered inline on `/` while a session is active — the room artwork stays behi
 Opened from the header. While the history store hydrates, the dialog shows a skeleton. Empty state → "No sessions yet" with a *Start focusing* button that closes the dialog. Otherwise:
 
 - **Stats card** — a large Today total, Yesterday as its subtitle, then This week, Sessions (count), Average, Longest (all seconds-derived compact durations).
-- **Last 7 days chart** — shadcn `ChartContainer` bar chart (Recharts) of focus seconds per day, with the week's total as subtitle and a duration-formatted tooltip.
+- **Last 7 days chart** — shadcn `ChartContainer` stacked bar chart (Recharts) of focus seconds per day, split by mode (Open / Target / Pomodoro) with a legend, the week's total as subtitle, and a duration-formatted tooltip that breaks the day down by mode.
 - **Session list** — newest first, with a `N total` counter, grouped by day (`Today` / `Yesterday` / weekday-date). Each row shows task name, mode badge (`Target · 50m` / `Open`), date + time, and compact duration. On `lg` screens stats/chart and the list sit in two independently scrolling columns; below that the dialog scrolls as one column.
 
 ## 7. Settings (`SettingsDialog`)

@@ -47,11 +47,14 @@ function sum(sessions: FocusSession[]): number {
 export interface DayBucket {
   day: number;
   label: string;
-  seconds: number;
   isToday: boolean;
+  /** Focus seconds per mode, so the weekly chart can stack by mode. */
+  open: number;
+  target: number;
+  pomodoro: number;
 }
 
-/** Trailing `n` calendar days ending today, oldest first. */
+/** Trailing `n` calendar days ending today, oldest first, split by focus mode. */
 export function lastNDays(n: number, sessions: FocusSession[], now: number): DayBucket[] {
   const buckets: DayBucket[] = [];
   const todayStart = startOfDay(now);
@@ -61,15 +64,17 @@ export function lastNDays(n: number, sessions: FocusSession[], now: number): Day
     buckets.push({
       day,
       label: formatDayShort(new Date(day)),
-      seconds: 0,
       isToday: day === todayStart,
+      open: 0,
+      target: 0,
+      pomodoro: 0,
     });
   }
 
   for (const s of sessions) {
     const day = startOfDay(s.startedAt);
     const bucket = buckets.find((b) => b.day === day);
-    if (bucket) bucket.seconds += s.actualDuration;
+    if (bucket) bucket[s.mode] += s.actualDuration;
   }
 
   return buckets;

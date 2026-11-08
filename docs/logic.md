@@ -121,7 +121,7 @@ Module-level singleton (`export const musicPlayer`) — one looped `HTMLAudioEle
 ## 7. Stats (`src/lib/stats.ts`)
 
 - `computeStats(sessions, now)` — today / yesterday / week (Monday-start) totals, count, average, longest, all from `actualDuration`.
-- `lastNDays(n, sessions, now)` — trailing `n` day buckets (oldest first) for the weekly chart.
+- `lastNDays(n, sessions, now)` — trailing `n` day buckets (oldest first) for the weekly chart, each split into `open` / `target` / `pomodoro` seconds so the chart can stack by mode.
 
 ## 8. Notifications (`src/lib/notifications.ts`)
 

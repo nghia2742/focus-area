@@ -33,7 +33,18 @@ export function HistoryDialog({ open, onOpenChange }: HistoryDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[85dvh] w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-5xl lg:max-w-6xl">
+      <DialogContent
+        className="flex max-h-[85dvh] w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-5xl lg:max-w-6xl"
+        onOpenAutoFocus={(event) => {
+          // The chart's focusable surface is the first tabbable; focusing it
+          // makes Recharts show its tooltip before the user hovers. Focus the
+          // close button instead so the chart only reacts to hover or keyboard.
+          event.preventDefault();
+          (event.currentTarget as HTMLElement | null)
+            ?.querySelector<HTMLElement>('[data-slot="dialog-close"]')
+            ?.focus();
+        }}
+      >
         <DialogHeader className="shrink-0 px-6 pt-6 pb-2">
           <DialogTitle>Focus History</DialogTitle>
           <DialogDescription>See what you actually focused on.</DialogDescription>
