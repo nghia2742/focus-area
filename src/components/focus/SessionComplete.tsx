@@ -14,14 +14,21 @@ import {
 interface SessionCompleteProps {
   durationSec: number;
   targetDuration?: number;
+  /** Pomodoro sessions: rounds that ran their full focus duration. */
+  roundsCompleted?: number;
+  /** Pomodoro sessions: rounds planned at start. */
+  roundsPlanned?: number;
   onDone: () => void;
 }
 
 export function SessionComplete({
   durationSec,
   targetDuration,
+  roundsCompleted,
+  roundsPlanned,
   onDone,
 }: SessionCompleteProps) {
+  const isPomodoro = roundsPlanned != null;
   const targetSec = targetDuration ? targetDuration * 60 : 0;
   const overtimeSec = targetSec ? Math.max(0, durationSec - targetSec) : 0;
 
@@ -36,15 +43,19 @@ export function SessionComplete({
         </span>
         <DialogHeader className="items-center gap-1.5">
           <DialogTitle className="text-2xl font-semibold tracking-tight">
-            Session complete
+            {isPomodoro
+              ? `Completed ${roundsCompleted ?? 0}/${roundsPlanned} rounds`
+              : "Session complete"}
           </DialogTitle>
           <p className="font-tabular text-xl font-medium text-primary">
             {formatDurationCompact(durationSec)}
           </p>
           <DialogDescription>
-            {overtimeSec > 0
-              ? `${formatDurationCompact(targetSec)} target + ${formatDurationCompact(overtimeSec)} overtime`
-              : "Nice work."}
+            {isPomodoro
+              ? `Total focus time: ${formatDurationCompact(durationSec)}`
+              : overtimeSec > 0
+                ? `${formatDurationCompact(targetSec)} target + ${formatDurationCompact(overtimeSec)} overtime`
+                : "Nice work."}
           </DialogDescription>
         </DialogHeader>
         <Button className="w-full" onClick={onDone}>

@@ -12,6 +12,7 @@ import { TimerDisplay } from "@/components/timer/TimerDisplay";
 import { TargetReached } from "@/components/focus/TargetReached";
 import { EndConfirmDialog } from "@/components/focus/EndConfirmDialog";
 import { ActiveSessionRestore } from "@/components/focus/ActiveSessionRestore";
+import { PomodoroTimer } from "@/components/focus/PomodoroTimer";
 
 interface FocusTimerProps {
   onComplete?: (record: FocusSession) => void;
@@ -19,13 +20,25 @@ interface FocusTimerProps {
 
 /**
  * The active session, rendered inline on the main screen (the room artwork
- * stays behind it) — it does not navigate anywhere. Shows the task name, the
- * timer, and the pause/end controls. No music controls.
+ * stays behind it). Pomodoro sessions run their own phase machine; every other
+ * mode uses the plain timestamp timer below.
  */
 export function FocusTimer({ onComplete }: FocusTimerProps) {
   const session = useFocusStore((s) => s.session);
-  const startedLocally = useFocusStore((s) => s.startedLocally);
   const hydrated = useFocusStore((s) => s.hydrated);
+
+  if (!hydrated) return <div className="absolute inset-0" />;
+  if (!session) return null;
+  if (session.mode === "pomodoro" && session.pomodoro) {
+    return <PomodoroTimer onComplete={onComplete} />;
+  }
+  return <StandardFocusTimer onComplete={onComplete} />;
+}
+
+/** Open/Target timer screen. Shows the task, the timer and the pause/end controls. */
+function StandardFocusTimer({ onComplete }: FocusTimerProps) {
+  const session = useFocusStore((s) => s.session);
+  const startedLocally = useFocusStore((s) => s.startedLocally);
   const pause = useFocusStore((s) => s.pause);
   const resume = useFocusStore((s) => s.resume);
   const enterOvertime = useFocusStore((s) => s.enterOvertime);
@@ -39,8 +52,7 @@ export function FocusTimer({ onComplete }: FocusTimerProps) {
   const notifiedFor = useRef<string | null>(null);
 
   /* Show the restore dialog for a persisted session not started this view. */
-  const showRestore =
-    hydrated && !!session && !startedLocally && !restoreDismissed;
+  const showRestore = !!session && !startedLocally && !restoreDismissed;
 
   /* Fire a browser notification when the target is reached (once per session). */
   useEffect(() => {
@@ -70,9 +82,6 @@ export function FocusTimer({ onComplete }: FocusTimerProps) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [modalOpen, status, pause, resume]);
 
-  if (!hydrated) {
-    return <div className="absolute inset-0" />;
-  }
   if (!session) return null;
 
   const isPaused = status === "paused";

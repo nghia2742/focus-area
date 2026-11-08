@@ -4,6 +4,7 @@ import { useState } from "react";
 import { PaletteIcon, Settings2Icon } from "lucide-react";
 import { useAppearanceStore } from "@/store/appearanceStore";
 import { useSettingsStore } from "@/store/settingsStore";
+import { usePomodoroConfigStore } from "@/features/pomodoro/store";
 import {
   Dialog,
   DialogContent,
@@ -36,7 +37,8 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   const [section, setSection] = useState<SettingsSection>("appearance");
   const settingsHydrated = useSettingsStore((s) => s.hydrated);
   const appearanceHydrated = useAppearanceStore((s) => s.hydrated);
-  const hydrated = settingsHydrated && appearanceHydrated;
+  const pomodoroHydrated = usePomodoroConfigStore((s) => s.hydrated);
+  const hydrated = settingsHydrated && appearanceHydrated && pomodoroHydrated;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

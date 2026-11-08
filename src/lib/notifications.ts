@@ -1,5 +1,7 @@
 "use client";
 
+import type { PomodoroState } from "@/features/pomodoro/types";
+
 export function isNotificationSupported(): boolean {
   return typeof window !== "undefined" && "Notification" in window;
 }
@@ -17,10 +19,10 @@ function completionBody(minutes: number, message?: string): string {
   return message?.trim() || `You've reached your ${minutes}-minute focus target.`;
 }
 
-function show(body: string, tag: string): void {
+function show(title: string, body: string, tag: string): void {
   if (!isNotificationSupported() || Notification.permission !== "granted") return;
   try {
-    new Notification("Focus complete", { body, tag });
+    new Notification(title, { body, tag });
   } catch {
     // Notifications are best-effort; never interrupt the session.
   }
@@ -28,7 +30,28 @@ function show(body: string, tag: string): void {
 
 /** Fires a browser notification when a target session reaches zero. */
 export function notifyTargetReached(minutes: number, message?: string): void {
-  show(completionBody(minutes, message), "focus-target-reached");
+  show("Focus complete", completionBody(minutes, message), "focus-target-reached");
+}
+
+/** Notifies when a Pomodoro phase changes (never used while restoring). */
+export function notifyPomodoroPhase(state: PomodoroState): void {
+  const { phase, round, config, startedAt } = state;
+  const tag = `pomodoro-${phase}-${round}-${startedAt}`;
+
+  if (state.status === "done") {
+    notifyTargetReached(config.focusMin);
+    return;
+  }
+  if (phase === "focus") {
+    show("Back to focus", `Round ${round}/${config.totalRounds} starting.`, tag);
+    return;
+  }
+  const minutes = phase === "shortBreak" ? config.shortBreakMin : config.longBreakMin;
+  show(
+    phase === "shortBreak" ? "Short break" : "Long break",
+    `You finished round ${round}/${config.totalRounds}. Take a ${minutes}-minute break.`,
+    tag,
+  );
 }
 
 export type NotificationPreviewResult = NotificationPermission | "unsupported";
@@ -47,7 +70,7 @@ export async function previewCompletionNotification(
       ? await Notification.requestPermission()
       : Notification.permission;
   if (permission === "granted") {
-    show(completionBody(minutes, message), "focus-target-reached-preview");
+    show("Focus complete", completionBody(minutes, message), "focus-target-reached-preview");
   }
   return permission;
 }

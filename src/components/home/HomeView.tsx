@@ -23,6 +23,8 @@ export function HomeView() {
   const [completed, setCompleted] = useState<{
     durationSec: number;
     targetDuration?: number;
+    roundsCompleted?: number;
+    roundsPlanned?: number;
   } | null>(null);
 
   if (!hydrated) {
@@ -42,6 +44,8 @@ export function HomeView() {
     setCompleted({
       durationSec: record.actualDuration,
       targetDuration: record.targetDuration,
+      roundsCompleted: record.roundsCompleted,
+      roundsPlanned: record.roundsPlanned,
     });
   };
 
@@ -57,6 +61,8 @@ export function HomeView() {
         <SessionComplete
           durationSec={completed.durationSec}
           targetDuration={completed.targetDuration}
+          roundsCompleted={completed.roundsCompleted}
+          roundsPlanned={completed.roundsPlanned}
           onDone={() => setCompleted(null)}
         />
       )}

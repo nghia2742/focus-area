@@ -29,6 +29,7 @@
   --color-destructive: var(--destructive);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
+  --color-accent-break: var(--accent-break);
   --color-muted-foreground: var(--muted-foreground);
   --color-muted: var(--muted);
   --color-secondary-foreground: var(--secondary-foreground);
@@ -73,6 +74,12 @@
   --artwork-ink-muted: oklch(0.97 0.01 70 / 62%);
   --artwork-veil: oklch(0.22 0.02 60 / 55%);
   --artwork-line: oklch(1 0 0 / 14%);
+  /* Break-phase accent, next to the themed --accent. */
+  --accent-break: oklch(0.72 0.1 200);
+}
+
+.dark {
+  --accent-break: oklch(0.78 0.09 200);
 }
 
 /* ---------- Base colors (neutral tokens) ---------- */
@@ -878,6 +885,25 @@
 /* Timer display: geometric tabular figures so digits don't jitter. */
 @utility font-tabular {
   font-variant-numeric: tabular-nums;
+}
+
+/* Current Pomodoro round: a gentle pulse, off when motion is reduced. */
+@keyframes dot-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@utility dot-pulse {
+  animation: dot-pulse 1.8s ease-in-out infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 }
 
 /*

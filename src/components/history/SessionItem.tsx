@@ -13,7 +13,9 @@ export function SessionItem({ session, now }: SessionItemProps) {
   const modeLabel =
     session.mode === "target" && session.targetDuration
       ? `Target · ${session.targetDuration}m`
-      : "Open";
+      : session.mode === "pomodoro"
+        ? `Pomodoro · ${session.roundsCompleted ?? 0}/${session.roundsPlanned ?? 0} rounds`
+        : "Open";
 
   return (
     <li className="flex items-center justify-between gap-3 rounded-xl bg-muted/40 px-4 py-3 transition-colors hover:bg-muted/60">

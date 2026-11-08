@@ -1,4 +1,6 @@
-export type FocusMode = "open" | "target";
+import type { PomodoroConfig, PomodoroState } from "@/features/pomodoro/types";
+
+export type FocusMode = "open" | "target" | "pomodoro";
 
 /** Status of a persisted, completed focus session. */
 export type SessionStatus = "completed" | "cancelled";
@@ -22,6 +24,10 @@ export interface FocusSession {
   status: SessionStatus;
   musicId?: string;
   backgroundId?: string;
+  /** Pomodoro sessions only: rounds that ran their full focus duration. */
+  roundsCompleted?: number;
+  /** Pomodoro sessions only: rounds planned at start. */
+  roundsPlanned?: number;
   /** Epoch ms when the record was created. */
   createdAt: number;
 }
@@ -49,6 +55,8 @@ export interface ActiveSession {
   backgroundId?: string;
   /** Custom body for the finish notification (target mode only). */
   completionMessage?: string;
+  /** Pomodoro mode only: the full phase machine state. */
+  pomodoro?: PomodoroState;
   createdAt: number;
 }
 
@@ -107,6 +115,8 @@ export interface FocusConfig {
   completionMessage?: string;
   musicId?: string;
   backgroundId?: string;
+  /** Pomodoro mode only: config snapshot for the new session. */
+  pomodoro?: PomodoroConfig;
 }
 
 export const FOCUS_DURATION_PRESETS: readonly number[] = [25, 50, 90];

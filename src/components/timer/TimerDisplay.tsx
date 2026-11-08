@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { useFocusTimer } from "@/hooks/useFocusTimer";
 import { formatClock, formatOvertime, formatTimer } from "@/lib/timer/format";
+import { cn } from "@/lib/utils";
 
 /**
  * The dominant visual element of the focus screen. Reads all values from the
@@ -55,14 +56,29 @@ export function TimerDisplay() {
   );
 }
 
-/** Thin circular progress ring that wraps the digits for target sessions. */
-function TimerRing({ progress, children }: { progress: number; children: ReactNode }) {
+/** Thin circular progress ring that wraps the digits. */
+export function TimerRing({
+  progress,
+  children,
+  className,
+  digitClassName,
+}: {
+  progress: number;
+  children: ReactNode;
+  className?: string;
+  digitClassName?: string;
+}) {
   const R = 47;
   const circumference = 2 * Math.PI * R;
   const clamped = Math.min(1, Math.max(0, progress));
 
   return (
-    <span className="relative grid aspect-square place-items-center p-[28px] text-primary sm:p-[32px]">
+    <span
+      className={cn(
+        "relative grid aspect-square place-items-center p-[28px] text-primary sm:p-[32px]",
+        className,
+      )}
+    >
       <svg
         viewBox="0 0 100 100"
         className="pointer-events-none absolute inset-0 h-full w-full -rotate-90"
@@ -90,7 +106,7 @@ function TimerRing({ progress, children }: { progress: number; children: ReactNo
           className="transition-[stroke-dashoffset] duration-1000 ease-linear"
         />
       </svg>
-      <span className="relative text-artwork-ink">{children}</span>
+      <span className={cn("relative text-artwork-ink", digitClassName)}>{children}</span>
     </span>
   );
 }

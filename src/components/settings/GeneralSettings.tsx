@@ -7,6 +7,8 @@ import { useSettingsStore } from "@/store/settingsStore";
 import { useAppearance } from "@/components/providers/AppearanceProvider";
 import { musicPlayer } from "@/lib/audio/musicPlayer";
 import { DEFAULT_SETTINGS } from "@/lib/storage/localStorage";
+import { usePomodoroConfigStore } from "@/features/pomodoro/store";
+import { PomodoroSettings } from "@/features/pomodoro/PomodoroSettings";
 import { DurationField } from "@/components/shared/DurationField";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
@@ -17,11 +19,15 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 export function GeneralSettings() {
   const { settings, update, resetSettings } = useSettingsStore();
+  const pomodoroConfig = usePomodoroConfigStore((s) => s.config);
+  const updatePomodoro = usePomodoroConfigStore((s) => s.update);
+  const resetPomodoro = usePomodoroConfigStore((s) => s.reset);
   const { resetAppearance } = useAppearance();
   const [confirmingReset, setConfirmingReset] = useState(false);
 
   const handleResetAll = () => {
     resetSettings();
+    resetPomodoro();
     resetAppearance();
     setConfirmingReset(false);
     musicPlayer.setVolume(DEFAULT_SETTINGS.musicVolume);
@@ -46,7 +52,7 @@ export function GeneralSettings() {
             aria-label="Default focus mode"
             value={settings.defaultMode}
             onValueChange={(value) => {
-              if (value === "open" || value === "target") {
+              if (value === "open" || value === "target" || value === "pomodoro") {
                 update({ defaultMode: value as FocusMode });
               }
             }}
@@ -54,10 +60,13 @@ export function GeneralSettings() {
             className="w-full"
           >
             <ToggleGroupItem value="open" className="flex-1">
-              Open Focus
+              Open
             </ToggleGroupItem>
             <ToggleGroupItem value="target" className="flex-1">
-              Target Focus
+              Target
+            </ToggleGroupItem>
+            <ToggleGroupItem value="pomodoro" className="flex-1">
+              Pomodoro
             </ToggleGroupItem>
           </ToggleGroup>
         </Field>
@@ -68,6 +77,10 @@ export function GeneralSettings() {
             value={settings.defaultDuration}
             onChange={(defaultDuration) => update({ defaultDuration })}
           />
+        )}
+
+        {settings.defaultMode === "pomodoro" && (
+          <PomodoroSettings config={pomodoroConfig} onChange={updatePomodoro} />
         )}
       </section>
 

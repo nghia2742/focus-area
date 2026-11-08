@@ -1,13 +1,16 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { BellIcon, PlayIcon, TimerIcon, TimerOffIcon } from "lucide-react";
+import { BellIcon, PlayIcon, RepeatIcon, TimerIcon, TimerOffIcon } from "lucide-react";
 import { toast } from "sonner";
 import type { FocusMode } from "@/types/focus";
 import { MAX_COMPLETION_MESSAGE_LENGTH } from "@/types/focus";
 import { ENVIRONMENTS, getEnvironment } from "@/data/environments";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useFocusStore } from "@/store/focusStore";
+import type { PomodoroConfig } from "@/features/pomodoro/types";
+import { usePomodoroConfigStore } from "@/features/pomodoro/store";
+import { PomodoroSettings } from "@/features/pomodoro/PomodoroSettings";
 import {
   previewCompletionNotification,
   requestNotificationPermission,
@@ -46,8 +49,8 @@ interface FocusSetupSheetProps {
 
 /**
  * Bottom sheet triggered by the Focus CTA: Task (optional) + Mode (Open /
- * Target) + Duration + finish message (Target only) + Start. The environment
- * pair is applied silently from settings — there is no picker here.
+ * Target / Pomodoro) + Duration (Target) or Pomodoro settings + Start. The
+ * environment pair is applied silently from settings — there is no picker here.
  */
 export function FocusSetupSheet({ open, onOpenChange }: FocusSetupSheetProps) {
   return (
@@ -74,17 +77,20 @@ export function FocusSetupSheet({ open, onOpenChange }: FocusSetupSheetProps) {
 
 /** Gates the form on hydration so it mounts with persisted defaults. */
 function SheetForm({ onStart }: { onStart: () => void }) {
-  const hydrated = useSettingsStore((s) => s.hydrated);
-  if (!hydrated) return <SheetSkeleton />;
+  const settingsHydrated = useSettingsStore((s) => s.hydrated);
+  const pomodoroHydrated = usePomodoroConfigStore((s) => s.hydrated);
+  if (!settingsHydrated || !pomodoroHydrated) return <SheetSkeleton />;
   return <SheetFormInner onStart={onStart} />;
 }
 
 function SheetFormInner({ onStart }: { onStart: () => void }) {
   const { settings, update } = useSettingsStore();
+  const { config: pomodoroDefaults, update: updatePomodoro } = usePomodoroConfigStore();
   const startSession = useFocusStore((s) => s.start);
 
   const [taskName, setTaskName] = useState("");
   const [mode, setMode] = useState<FocusMode>(settings.defaultMode);
+  const [pomodoro, setPomodoro] = useState<PomodoroConfig>(pomodoroDefaults);
   const [targetDuration, setTargetDuration] = useState(() => {
     const minutes = settings.defaultDuration;
     return Number.isInteger(minutes) && minutes >= 1 && minutes <= 600 ? minutes : 50;
@@ -137,9 +143,11 @@ function SheetFormInner({ onStart }: { onStart: () => void }) {
       completionMessage,
       musicId: environment.musicId,
       backgroundId: environment.backgroundId,
+      pomodoro: mode === "pomodoro" ? pomodoro : undefined,
     });
 
     if (mode === "target") update({ completionMessage: completionMessage ?? "" });
+    if (mode === "pomodoro") updatePomodoro(pomodoro);
     if (settings.rememberLastEnvironment) update({ lastEnvironmentId: environment.id });
 
     requestNotificationPermission();
@@ -178,14 +186,22 @@ function SheetFormInner({ onStart }: { onStart: () => void }) {
           >
             <ToggleGroupItem value="open" className="flex-1">
               <TimerOffIcon data-icon="inline-start" />
-              Open Focus
+              Open
             </ToggleGroupItem>
             <ToggleGroupItem value="target" className="flex-1">
               <TimerIcon data-icon="inline-start" />
-              Target Focus
+              Target
+            </ToggleGroupItem>
+            <ToggleGroupItem value="pomodoro" className="flex-1">
+              <RepeatIcon data-icon="inline-start" />
+              Pomodoro
             </ToggleGroupItem>
           </ToggleGroup>
         </Field>
+
+        {mode === "pomodoro" && (
+          <PomodoroSettings config={pomodoro} onChange={setPomodoro} />
+        )}
 
         {mode === "target" && (
           <>

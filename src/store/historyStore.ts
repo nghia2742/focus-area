@@ -23,7 +23,9 @@ export const useHistoryStore = create<HistoryState>()(
     }),
     {
       name: "focus-history",
+      version: 1,
       storage: createJSONStorage(() => localStorage),
+      migrate: (persisted) => persisted as HistoryState,
       onRehydrateStorage: () => (state) => {
         if (state) state.hydrated = true;
       },
