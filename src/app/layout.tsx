@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { appearanceScript } from "@/lib/appearance/prehydrate";
 import { DEFAULT_APPEARANCE } from "@/lib/appearance/presets";
@@ -43,6 +44,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {/* Applies persisted appearance tokens before the first paint. */}
         <script dangerouslySetInnerHTML={{ __html: appearanceScript }} />
         <Providers>{children}</Providers>
+        <Analytics />
         <div
           aria-hidden
           className="noise pointer-events-none fixed inset-0 z-[60] opacity-[0.035]"
