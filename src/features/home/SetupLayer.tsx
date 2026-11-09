@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { PlayIcon } from "lucide-react";
 import { FocusSetupSheet } from "@/features/focus/FocusSetupSheet";
 import { ZenFade } from "@/components/layout/ZenFade";
+import { ensureNotificationPermission } from "@/lib/notifications";
 import { useHotkey } from "@/hooks/useHotkey";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
@@ -26,7 +27,14 @@ export function SetupLayer() {
   const ctaRef = useRef<HTMLButtonElement>(null);
   const wasOpenRef = useRef(false);
 
-  useHotkey("f", () => setSheetOpen(true));
+  const openSheet = () => {
+    // A browser only shows its permission prompt from a user gesture, so this
+    // early click is the earliest we can ask (Start asks again, as a fallback).
+    void ensureNotificationPermission();
+    setSheetOpen(true);
+  };
+
+  useHotkey("f", openSheet);
 
   useEffect(() => {
     if (wasOpenRef.current && !sheetOpen) {
@@ -47,7 +55,7 @@ export function SetupLayer() {
               </span>
             ))}
           </div>
-          <FocusCta ref={ctaRef} onOpen={() => setSheetOpen(true)} />
+          <FocusCta ref={ctaRef} onOpen={openSheet} />
         </div>
       </ZenFade>
       <FocusSetupSheet open={sheetOpen} onOpenChange={setSheetOpen} />

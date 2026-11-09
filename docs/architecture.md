@@ -68,7 +68,7 @@ validate (custom duration 1–600) →
 environment = getEnvironment(remembered lastEnvironmentId) ?? ENVIRONMENTS[0] →
 startSession({ taskName, mode, targetDuration, completionMessage, musicId, backgroundId })  [focusStore]
 save completionMessage (Target only) / lastEnvironmentId [settingsStore]
-requestNotificationPermission()
+ensureNotificationPermission() + unlockCompletionSound(first chime)  [both inside the click]
 → focusStore.start turns Zen Mode on
 → HomeView re-renders (session set) → FocusTimer
 ```
@@ -110,8 +110,9 @@ persist rehydrates `session` (startedLocally is not persisted)
 src/app/            layout, page, providers, globals.css (Tailwind v4 theme)
 src/features/
   home/             HomeView (page switch), SetupLayer
-  focus/            FocusTimer, FocusSetupSheet, TargetReached, EndConfirmDialog,
-                    SessionComplete, ActiveSessionRestore, TimerDisplay
+  focus/            FocusTimer, FocusSetupSheet, AlertStatus, TargetReached,
+                    EndConfirmDialog, SessionComplete, ActiveSessionRestore,
+                    TimerDisplay
   pomodoro/         machine, config, types, usePomodoro, store, PomodoroTimer,
                     PomodoroSettings, RoundDots (see docs/specs/pomodoro-cycles.md)
   history/          HistoryDialog, FocusStats, WeekChart, SessionList, SessionItem

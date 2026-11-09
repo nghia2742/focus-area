@@ -11,9 +11,11 @@ import { useFocusStore } from "@/store/focusStore";
 import type { PomodoroConfig } from "@/features/pomodoro/types";
 import { usePomodoroConfigStore } from "@/features/pomodoro/store";
 import { PomodoroSettings } from "@/features/pomodoro/PomodoroSettings";
+import { AlertStatus } from "@/features/focus/AlertStatus";
+import { unlockCompletionSound } from "@/lib/audio/completionSound";
 import {
+  ensureNotificationPermission,
   previewCompletionNotification,
-  requestNotificationPermission,
 } from "@/lib/notifications";
 import {
   DurationField,
@@ -60,8 +62,9 @@ export function FocusSetupSheet({ open, onOpenChange }: FocusSetupSheetProps) {
         className="mx-auto max-h-[86dvh] w-full gap-0 rounded-t-3xl border-0 p-0 sm:max-w-xl"
       >
         <SheetHeader className="gap-1 px-6 pt-6 pb-4 pr-14">
-          <SheetTitle className="text-xl font-semibold tracking-tight">
+          <SheetTitle className="flex items-center gap-2 text-xl font-semibold tracking-tight">
             What are you working on?
+            <AlertStatus />
           </SheetTitle>
           <SheetDescription>
             Set an intention, then disappear into it.
@@ -146,7 +149,11 @@ function SheetFormInner({ onStart }: { onStart: () => void }) {
     if (mode === "pomodoro") updatePomodoro(pomodoro);
     update({ lastEnvironmentId: environment.id });
 
-    requestNotificationPermission();
+    // Both permissions can only be granted from inside this click gesture.
+    void ensureNotificationPermission();
+    const firstChimeId =
+      mode === "pomodoro" ? pomodoro.breakSoundId : settings.completionSoundId;
+    void unlockCompletionSound(firstChimeId);
     onStart();
   };
 

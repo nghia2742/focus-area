@@ -6,12 +6,27 @@ export function isNotificationSupported(): boolean {
   return typeof window !== "undefined" && "Notification" in window;
 }
 
-export function requestNotificationPermission(): void {
-  if (!isNotificationSupported()) return;
-  if (Notification.permission === "default") {
-    // Best-effort; must be called within a user gesture to be meaningful.
-    void Notification.requestPermission();
+export type NotificationPreviewResult = NotificationPermission | "unsupported";
+
+/**
+ * Asks for notification permission while it is still `default`, so the browser
+ * shows its prompt. Must be called from a user gesture; never rejects.
+ */
+export async function ensureNotificationPermission(): Promise<NotificationPreviewResult> {
+  if (!isNotificationSupported()) return "unsupported";
+  if (Notification.permission !== "default") return Notification.permission;
+  try {
+    return await Notification.requestPermission();
+  } catch {
+    // Insecure context or blocked by policy — treat it as not granted.
+    return "denied";
   }
+}
+
+/** The current permission, or `"unsupported"` when the browser has no Notification API. */
+export function getNotificationPermission(): NotificationPreviewResult {
+  if (!isNotificationSupported()) return "unsupported";
+  return Notification.permission;
 }
 
 /** The finish-notification body: the custom message, or the default sentence. */
@@ -54,8 +69,6 @@ export function notifyPomodoroPhase(state: PomodoroState): void {
   );
 }
 
-export type NotificationPreviewResult = NotificationPermission | "unsupported";
-
 /**
  * Asks for permission when needed, then shows the finish notification so the
  * user can see their message. Must be called from a user gesture (a click).
@@ -64,11 +77,7 @@ export async function previewCompletionNotification(
   minutes: number,
   message?: string,
 ): Promise<NotificationPreviewResult> {
-  if (!isNotificationSupported()) return "unsupported";
-  const permission =
-    Notification.permission === "default"
-      ? await Notification.requestPermission()
-      : Notification.permission;
+  const permission = await ensureNotificationPermission();
   if (permission === "granted") {
     show("Focus complete", completionBody(minutes, message), "focus-target-reached-preview");
   }
