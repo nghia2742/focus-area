@@ -13,6 +13,7 @@ import {
   resumeSession,
 } from "@/lib/timer/timer";
 import { useHistoryStore } from "./historyStore";
+import { useSettingsStore } from "./settingsStore";
 
 interface FocusState {
   session: ActiveSession | null;
@@ -56,6 +57,7 @@ export const useFocusStore = create<FocusState>()(
               : session,
           startedLocally: true,
         });
+        useSettingsStore.getState().setZenMode(true);
       },
 
       pause: () => {
@@ -82,6 +84,7 @@ export const useFocusStore = create<FocusState>()(
         const record = completeSession(session, Date.now());
         useHistoryStore.getState().addSession(record);
         set({ session: null, startedLocally: false });
+        useSettingsStore.getState().setZenMode(false);
         return record;
       },
 
@@ -113,10 +116,14 @@ export const useFocusStore = create<FocusState>()(
           useHistoryStore.getState().addSession(record);
         }
         set({ session: null, startedLocally: false });
+        useSettingsStore.getState().setZenMode(false);
         return record;
       },
 
-      discard: () => set({ session: null, startedLocally: false }),
+      discard: () => {
+        set({ session: null, startedLocally: false });
+        useSettingsStore.getState().setZenMode(false);
+      },
 
       setEnvironment: ({ musicId, backgroundId }) => {
         const { session } = get();

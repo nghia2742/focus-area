@@ -71,10 +71,10 @@ One zustand store per domain, each with `persist` + a `hydrated` flag set in `on
 
 Persist key `focus-active-session`; `partialize` persists **only `session`** (the transient `startedLocally` flag is not persisted, so a reloaded session is correctly treated as "restored").
 
-- `start(config)` — guarded (no-op if a session already exists, preventing double-start).
+- `start(config)` — guarded (no-op if a session already exists, preventing double-start); turns Zen Mode on.
 - `pause` / `resume` / `enterOvertime` — delegate to the timer engine with `Date.now()`.
-- `complete()` — builds the record via the engine, pushes it into `useHistoryStore`, clears the session, returns the record.
-- `discard()` — clears without saving (no current UI calls it).
+- `complete()` — builds the record via the engine, pushes it into `useHistoryStore`, clears the session, turns Zen Mode off, returns the record.
+- `discard()` — clears without saving and turns Zen Mode off (no current UI calls it).
 - `setEnvironment({musicId, backgroundId})` — swaps the pair on the live session (no current UI calls it).
 
 ### `settingsStore` — preferences + Zen Mode
@@ -83,11 +83,15 @@ Persist key `focus-settings`; `partialize` persists **only `settings`** — `zen
 
 ```
 defaultMode: "target", defaultDuration: 50,
-musicVolume: 0.6, rememberLastEnvironment: true,
+musicVolume: 0.6, completionSoundId: "bell",
 lastEnvironmentId?, completionMessage: ""
 ```
 
-`update(partial)` shallow-merges settings; `setZenMode(bool)` drives `ZenFade` and the rail toggle.
+`update(partial)` shallow-merges settings; `setZenMode(bool)` drives `ZenFade` and the rail toggle. `focusStore` turns it on in `start` and off in `complete` / `finishPomodoro` / `discard`. `merge` backfills any missing keys from `DEFAULT_SETTINGS`, so older persisted settings gain new fields (e.g. `completionSoundId`) without a migration.
+
+### `soundStore` — custom notification sounds
+
+Persist key `focus-sounds`; stores only `customSounds` (`{ id: "custom:<uuid>", name, dataUrl }`). `addCustomSound` appends, `removeCustomSound` filters by id, `resetCustomSounds` empties the list. The upload/delete UI is temporarily hidden; the Sound tab reads the list to include existing custom sounds, and `playCompletionSound` still resolves them. Uploads were validated as audio, ≤ 1 MB, and kept as data URLs.
 
 ### `appearanceStore` — visual presets
 
@@ -99,8 +103,8 @@ Persist key `focus-history`. `addSession` prepends; `clearSessions` wipes (no cu
 
 ## 4. Persistence & migration
 
-- zustand `createJSONStorage(() => localStorage)`. Keys: `focus-active-session`, `focus-settings`, `focus-appearance`, `focus-history`, plus `theme` owned by `next-themes`.
-- **Migration:** `lastMusicId` / `lastBackgroundId` / `rememberLastMusic` / `rememberLastBackground` were replaced by `rememberLastEnvironment` + `lastEnvironmentId`. Old keys in persisted JSON are simply ignored by the store shape — no migration code runs. Appearance values are validated on merge (`isAppearanceStyle` / `isBaseColor` / `isPaletteColor`), so unknown ids fall back to defaults; `appearanceScript` in `layout.tsx` applies the persisted appearance before first paint.
+- zustand `createJSONStorage(() => localStorage)`. Keys: `focus-active-session`, `focus-settings`, `focus-appearance`, `focus-history`, `focus-sounds`, plus `theme` owned by `next-themes`.
+- **Migration:** `lastMusicId` / `lastBackgroundId` / `rememberLastMusic` / `rememberLastBackground` were replaced by a single remembered `lastEnvironmentId`. Old keys in persisted JSON are simply ignored by the store shape — no migration code runs. Appearance values are validated on merge (`isAppearanceStyle` / `isBaseColor` / `isPaletteColor`), so unknown ids fall back to defaults; `appearanceScript` in `layout.tsx` applies the persisted appearance before first paint.
 - The helpers in `src/lib/storage/localStorage.ts` (`getSettings`, `saveSessions`, `getActiveSession`, …) use older keys (`focus:settings`, etc.) and are **not** used by the stores — only `DEFAULT_SETTINGS` is imported. Do not dual-write through them.
 
 ## 5. Audio (`src/lib/audio/musicPlayer.ts`)
@@ -110,6 +114,7 @@ Module-level singleton (`export const musicPlayer`) — one looped `HTMLAudioEle
 - API: `setTrack` / `play` / `pause` / `toggle` / `setVolume` / `retry` / `stop`, plus `isPlaying` / `error` / `trackId` getters and a `subscribe` listener set.
 - **Not wired to the UI yet.** No component calls `setTrack` or `play`; the only caller is the Settings volume slider (`setVolume`). Sessions record `musicId`, but no audio starts on Start Focus or anywhere else. The autoplay-on-gesture contract in the original spec is therefore not currently exercised.
 - `setTrack` failures (autoplay rejection / missing file) are swallowed and surfaced via `error` / `isPlaying`; audio can never touch the timer.
+- `playCompletionSound(soundId?)` in `src/lib/audio/completionSound.ts` resolves the id against custom sounds (`focus-sounds`) first, then built-ins (`src/data/sounds.ts`), plays it through one shared `Audio` element and ignores an autoplay rejection. `unlockCompletionSound(soundId?)` primes that element from inside a click (volume 0, then pause), records the outcome in `isCompletionSoundBlocked()` and returns whether the browser refused the playback, so the setup sheet can show a *Sound is blocked* icon whose click retests and then plays the chime for real. Target sessions chime only when the target is reached (manual end is silent); Open sessions are silent. Pomodoro uses `config.breakSoundId` on every automatic phase change and `config.endSoundId` when the cycle finishes naturally — manually ending a Pomodoro session is silent. Sound ids may be built-in (`bell`, `cow-bell`, `school-bell`, `alarm-clock-short`, `bedside-clock-alarm`) or `custom:<uuid>`.
 
 ## 6. Background (`src/components/media/MainBackground.tsx`)
 
@@ -125,7 +130,7 @@ Module-level singleton (`export const musicPlayer`) — one looped `HTMLAudioEle
 
 ## 8. Notifications (`src/lib/notifications.ts`)
 
-- `requestNotificationPermission()` — best-effort, called from the Start Focus gesture.
+- `ensureNotificationPermission()` — awaits the browser prompt while permission is still `default` and returns the result (`unsupported` off the web); must be called inside a user gesture, so it runs on the clicks that open the setup sheet and on Start, not on page load. `getNotificationPermission()` returns the current state without asking. `AlertStatus` (after the setup-sheet title) and the preview button use them; the icon shows the state and the fix as steps in its tooltip and retries on click, while the preview button toasts its result. A `default` result after asking means the browser swallowed the prompt, and the tooltip falls back to the manual site-settings step.
 - `previewCompletionNotification(minutes, message)` — asks for permission while it is still `default`, then shows the notification with a `-preview` tag; returns the resulting `NotificationPermission` (or `"unsupported"`). Called from the preview button's click gesture.
 - `notifyTargetReached(minutes, message?)` — fires only when permission is `granted`; the body is the custom message or the default sentence; wrapped in try/catch and never blocking. `FocusTimer` dedupes it per session id.
 

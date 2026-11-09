@@ -101,7 +101,8 @@ export interface AppSettings {
   defaultMode: FocusMode;
   defaultDuration: number;
   musicVolume: number;
-  rememberLastEnvironment: boolean;
+  /** Sound played when a Target session reaches zero. */
+  completionSoundId: string;
   lastEnvironmentId?: string;
   /** Remembered custom finish-notification message (empty = default body). */
   completionMessage?: string;

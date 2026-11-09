@@ -136,4 +136,13 @@ test("config clamps out-of-range values", () => {
   assert.equal(c.focusMin, 1);
   assert.equal(clampConfig({ focusMin: 500 }).focusMin, 120);
   assert.equal(c.totalRounds, 12);
+  assert.equal(clampConfig({ breakSoundId: "nope" }).breakSoundId, "bell");
+  assert.equal(
+    clampConfig({ endSoundId: "alarm-clock-short" }).endSoundId,
+    "alarm-clock-short",
+  );
+  assert.equal(
+    clampConfig({ endSoundId: "custom:abc" }).endSoundId,
+    "custom:abc",
+  );
 });

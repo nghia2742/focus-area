@@ -10,7 +10,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   defaultMode: "target",
   defaultDuration: 50,
   musicVolume: 0.6,
-  rememberLastEnvironment: true,
+  completionSoundId: "bell",
   completionMessage: "",
 };
 

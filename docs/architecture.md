@@ -67,8 +67,9 @@ Audio state is **not** in a store — the module singleton `musicPlayer` exists,
 validate (custom duration 1–600) →
 environment = getEnvironment(remembered lastEnvironmentId) ?? ENVIRONMENTS[0] →
 startSession({ taskName, mode, targetDuration, completionMessage, musicId, backgroundId })  [focusStore]
-save completionMessage (Target only) / lastEnvironmentId (when remembering) [settingsStore]
-requestNotificationPermission()
+save completionMessage (Target only) / lastEnvironmentId [settingsStore]
+ensureNotificationPermission() + unlockCompletionSound(first chime)  [both inside the click]
+→ focusStore.start turns Zen Mode on
 → HomeView re-renders (session set) → FocusTimer
 ```
 
@@ -109,12 +110,14 @@ persist rehydrates `session` (startedLocally is not persisted)
 src/app/            layout, page, providers, globals.css (Tailwind v4 theme)
 src/features/
   home/             HomeView (page switch), SetupLayer
-  focus/            FocusTimer, FocusSetupSheet, TargetReached, EndConfirmDialog,
-                    SessionComplete, ActiveSessionRestore, TimerDisplay
+  focus/            FocusTimer, FocusSetupSheet, AlertStatus, TargetReached,
+                    EndConfirmDialog, SessionComplete, ActiveSessionRestore,
+                    TimerDisplay
   pomodoro/         machine, config, types, usePomodoro, store, PomodoroTimer,
                     PomodoroSettings, RoundDots (see docs/specs/pomodoro-cycles.md)
   history/          HistoryDialog, FocusStats, WeekChart, SessionList, SessionItem
-  settings/         SettingsDialog, AppearanceSettings, GeneralSettings
+  settings/         SettingsDialog, GeneralSettings, SoundSettings, SoundList,
+                    AppearanceSettings
 src/components/
   ui/               shadcn-style primitives (button, chart, dialog, field, kbd, sheet,
                     toggle-group, toggle, tooltip, …)
@@ -122,23 +125,26 @@ src/components/
   media/            MainBackground
   providers/        AppearanceProvider (preset data attrs + next-themes color mode)
   shared/           DurationField (presets + custom input, used by setup and settings)
-src/store/          focusStore, settingsStore, appearanceStore, historyStore
+src/store/          focusStore, settingsStore, appearanceStore, historyStore, soundStore
 src/lib/
   timer/            timer.ts (pure engine), format.ts
   appearance/       presets.ts (ids/labels/defaults), prehydrate.ts (blocking script)
-  audio/            musicPlayer.ts (singleton, currently unwired)
+  audio/            musicPlayer.ts (singleton, currently unwired),
+                    completionSound.ts (built-in + custom notification sounds)
   storage/          legacy localStorage helpers (DEFAULT_SETTINGS only)
   stats.ts          computeStats, lastNDays
   notifications.ts  Notification helpers
   utils.ts          cn()
 src/hooks/          useFocusTimer, useHotkey, useNow, useReferenceNow, usePrefersReducedMotion
-src/data/           environments.ts, music.ts, backgrounds.ts
+src/data/           environments.ts, music.ts, backgrounds.ts, sounds.ts
 src/types/          focus.ts (all shared types + constants)
 public/
   backgrounds/      270507_small.mp4 (the live artwork)
                     cat-studying.* / capybara-violin.* (data-only, not rendered)
   music/            late-night-study.mp3, violin-velvet-study-room.mp3 (unwired)
   ambient-sounds/   rain / forest / fire / waves / windy (unused)
+  sounds/           bell / cow-bell / school-bell / alarm-clock-short /
+                    bedside-clock-alarm (notification chimes)
   setup/            main_bg.png (unused)
 ```
 

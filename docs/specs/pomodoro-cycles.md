@@ -47,7 +47,7 @@ Thêm chế độ phiên thứ 3 **Pomodoro** bên cạnh **Open Focus** và **T
 - Cập nhật `document.title`.
 
 ### Out of scope (không làm trong spec này)
-- Âm chuông kết thúc pha (thuộc spec riêng).
+- Âm chuông kết thúc pha (đã làm: chọn ở Settings → Sound, không nằm trong form Pomodoro).
 - Overtime trong Pomodoro (không hỗ trợ).
 - Gắn tag cho phiên, streak, mục tiêu ngày.
 - Thống kê riêng theo pha hoặc theo vòng.
@@ -67,6 +67,8 @@ Thêm chế độ phiên thứ 3 **Pomodoro** bên cạnh **Open Focus** và **T
 | Tổng số vòng focus của phiên | `totalRounds` | 4 | 1 | 12 | vòng |
 | Tự chạy nghỉ | `autoStartBreak` | `true` | - | - | bool |
 | Tự chạy focus kế tiếp | `autoStartFocus` | `false` | - | - | bool |
+| Âm báo chuyển pha | `breakSoundId` | `bell` | - | - | id built-in hoặc `custom:<uuid>` |
+| Âm báo kết thúc phiên | `endSoundId` | `bell` | - | - | id built-in hoặc `custom:<uuid>` |
 
 Preset nhanh trong UI (chip): **25/5/15** (mặc định), **50/10/30**, **90/15/30**.
 
@@ -106,6 +108,8 @@ export interface PomodoroConfig {
   totalRounds: number;
   autoStartBreak: boolean;
   autoStartFocus: boolean;
+  breakSoundId: string;
+  endSoundId: string;
 }
 
 export interface PomodoroState {
@@ -234,6 +238,7 @@ Trả về từ hook: `{ state, remainingMs, progress, start, pause, resume, ski
   - 5 ô số: `focusMin`, `shortBreakMin`, `longBreakMin`, `roundsPerLongBreak`, `totalRounds`.
   - 2 công tắc: `Tự chạy nghỉ`, `Tự chạy focus kế tiếp`.
 - Dòng tóm tắt dưới form, ví dụ: `4 vòng · tổng focus 100 phút` (`totalRounds * focusMin`).
+- Âm báo chuyển pha / kết thúc phiên **không** nằm trong form này; chúng ở tab **Sound** của Settings dialog.
 - **Tuân thủ Adaptive No-Scroll Layout**: bottom sheet dùng vùng co giãn, trên màn hình thấp các ô số xếp 2 cột thay vì cuộn.
 
 ### 8.2 Bộ đếm thời gian (#5)
