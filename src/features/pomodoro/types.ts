@@ -9,6 +9,10 @@ export interface PomodoroConfig {
   totalRounds: number;
   autoStartBreak: boolean;
   autoStartFocus: boolean;
+  /** Sound played when a phase changes (break starts or ends). */
+  breakSoundId: string;
+  /** Sound played when the whole session finishes. */
+  endSoundId: string;
 }
 
 export interface PomodoroState {

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { FocusSession } from "@/types/focus";
+import { requestNotificationPermission } from "@/lib/notifications";
 import { useFocusStore } from "@/store/focusStore";
 import { FocusTimer } from "@/features/focus/FocusTimer";
 import { SessionComplete } from "@/features/focus/SessionComplete";
@@ -26,6 +27,11 @@ export function HomeView() {
     roundsCompleted?: number;
     roundsPlanned?: number;
   } | null>(null);
+
+  /* Ask once on entry; the start gesture asks again if still not granted. */
+  useEffect(() => {
+    requestNotificationPermission();
+  }, []);
 
   if (!hydrated) {
     return (

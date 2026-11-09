@@ -130,11 +130,7 @@ function SheetFormInner({ onStart }: { onStart: () => void }) {
     }
 
     // No environment picker in setup — apply the remembered pair, else default.
-    const environmentId =
-      settings.rememberLastEnvironment && settings.lastEnvironmentId
-        ? settings.lastEnvironmentId
-        : ENVIRONMENTS[0].id;
-    const environment = getEnvironment(environmentId) ?? ENVIRONMENTS[0];
+    const environment = getEnvironment(settings.lastEnvironmentId) ?? ENVIRONMENTS[0];
 
     startSession({
       taskName,
@@ -148,7 +144,7 @@ function SheetFormInner({ onStart }: { onStart: () => void }) {
 
     if (mode === "target") update({ completionMessage: completionMessage ?? "" });
     if (mode === "pomodoro") updatePomodoro(pomodoro);
-    if (settings.rememberLastEnvironment) update({ lastEnvironmentId: environment.id });
+    update({ lastEnvironmentId: environment.id });
 
     requestNotificationPermission();
     onStart();

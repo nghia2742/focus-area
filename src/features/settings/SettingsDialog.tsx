@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { PaletteIcon, Settings2Icon } from "lucide-react";
+import { PaletteIcon, Settings2Icon, Volume2Icon } from "lucide-react";
 import { useAppearanceStore } from "@/store/appearanceStore";
 import { useSettingsStore } from "@/store/settingsStore";
+import { useSoundStore } from "@/store/soundStore";
 import { usePomodoroConfigStore } from "@/features/pomodoro/store";
 import {
   Dialog,
@@ -16,8 +17,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { AppearanceSettings } from "./AppearanceSettings";
 import { GeneralSettings } from "./GeneralSettings";
+import { SoundSettings } from "./SoundSettings";
 
-type SettingsSection = "appearance" | "general";
+type SettingsSection = "appearance" | "general" | "sound";
 
 const SECTIONS: {
   value: SettingsSection;
@@ -25,6 +27,7 @@ const SECTIONS: {
   icon: typeof PaletteIcon;
 }[] = [
   { value: "general", label: "General", icon: Settings2Icon },
+  { value: "sound", label: "Sound", icon: Volume2Icon },
   { value: "appearance", label: "Appearance", icon: PaletteIcon },
 ];
 
@@ -38,7 +41,9 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
   const settingsHydrated = useSettingsStore((s) => s.hydrated);
   const appearanceHydrated = useAppearanceStore((s) => s.hydrated);
   const pomodoroHydrated = usePomodoroConfigStore((s) => s.hydrated);
-  const hydrated = settingsHydrated && appearanceHydrated && pomodoroHydrated;
+  const soundsHydrated = useSoundStore((s) => s.hydrated);
+  const hydrated =
+    settingsHydrated && appearanceHydrated && pomodoroHydrated && soundsHydrated;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -57,7 +62,9 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
               aria-label="Settings sections"
               value={section}
               onValueChange={(value) => {
-                if (value === "appearance" || value === "general") setSection(value);
+                if (value === "appearance" || value === "general" || value === "sound") {
+                  setSection(value);
+                }
               }}
               className="w-full gap-1 sm:flex-col"
             >
@@ -84,6 +91,8 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
               </div>
             ) : section === "appearance" ? (
               <AppearanceSettings />
+            ) : section === "sound" ? (
+              <SoundSettings />
             ) : (
               <GeneralSettings />
             )}

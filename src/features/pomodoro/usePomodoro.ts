@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useFocusStore } from "@/store/focusStore";
 import { useNow } from "@/hooks/useNow";
 import { notifyPomodoroPhase } from "@/lib/notifications";
+import { playCompletionSound } from "@/lib/audio/completionSound";
 import { formatTimer } from "@/lib/timer/format";
 import { PHASE_LABELS } from "./config";
 import * as machine from "./machine";
@@ -53,6 +54,7 @@ export function usePomodoro() {
     const next = machine.complete(state, state.endsAt);
     setPomodoro(next);
     notifyPomodoroPhase(next);
+    playPhaseSound(next);
   }, [session, state, now, tick, setPomodoro]);
 
   const remainingMs = state
@@ -90,6 +92,7 @@ export function usePomodoro() {
     const next = machine.skip(state, Date.now());
     setPomodoro(next);
     notifyPomodoroPhase(next);
+    playPhaseSound(next);
   };
 
   const startNext = () => {
@@ -107,6 +110,13 @@ export function usePomodoro() {
     : 0;
 
   return { state, remainingMs, progress, start, pause, resume, skip, startNext, end };
+}
+
+/** Break chime on every phase change, end chime when the last focus round ends. */
+function playPhaseSound(state: PomodoroState): void {
+  playCompletionSound(
+    state.status === "done" ? state.config.endSoundId : state.config.breakSoundId,
+  );
 }
 
 function titleFor(state: PomodoroState, remainingSec: number): string {

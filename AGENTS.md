@@ -118,7 +118,7 @@ History and Settings are **dialogs**, not routes. The focus session renders on `
 - **Environments are pairs in data only.** Music and background are coupled via `src/data/environments.ts`; setup applies the remembered pair (or `quiet`) and records both ids on the session. There is no picker yet; keep any future picker paired rather than reintroducing separate music/background pickers.
 - **Full-bleed layout gotcha.** `height: 100%` does NOT resolve against a parent whose height comes from `flex-grow` (it falls back to auto — this caused a real "video only fills part of the screen" bug). Use `flex-1` on the flex item and `absolute inset-0` for full-bleed layers (`MainBackground` and the focus content layer both use `absolute inset-0`).
 - **Persistence.** zustand persist keys: `focus-active-session`, `focus-settings`, `focus-history`. The legacy `src/lib/storage/localStorage.ts` helpers (`getSettings`/`saveSessions`/etc.) are mostly unused — only `DEFAULT_SETTINGS` is imported from it. Do not dual-write.
-- **Settings migration.** `lastMusicId`/`lastBackgroundId`/`rememberLastMusic`/`rememberLastBackground` were replaced by `rememberLastEnvironment` + `lastEnvironmentId`. Old persisted values are ignored automatically — do not add back the old keys.
+- **Settings migration.** `lastMusicId`/`lastBackgroundId`/`rememberLastMusic`/`rememberLastBackground` were replaced by a single remembered `lastEnvironmentId`. Old persisted values are ignored automatically — do not add back the old keys.
 - **Don't kill the MCP node processes** — they back the `playwright_browser_*` and `shadcn_*` tools. For one-off browser verification use `playwright-core` installed with `--no-save`, then remove it.
 
 ## Verification workflow

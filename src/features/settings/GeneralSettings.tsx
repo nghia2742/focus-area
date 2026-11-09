@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Volume2Icon } from "lucide-react";
 import type { FocusMode } from "@/types/focus";
 import { useSettingsStore } from "@/store/settingsStore";
+import { useSoundStore } from "@/store/soundStore";
 import { useAppearance } from "@/components/providers/AppearanceProvider";
 import { musicPlayer } from "@/lib/audio/musicPlayer";
 import { DEFAULT_SETTINGS } from "@/lib/storage/localStorage";
@@ -13,8 +13,6 @@ import { DurationField } from "@/components/shared/DurationField";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Separator } from "@/components/ui/separator";
-import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 export function GeneralSettings() {
@@ -22,12 +20,14 @@ export function GeneralSettings() {
   const pomodoroConfig = usePomodoroConfigStore((s) => s.config);
   const updatePomodoro = usePomodoroConfigStore((s) => s.update);
   const resetPomodoro = usePomodoroConfigStore((s) => s.reset);
+  const resetCustomSounds = useSoundStore((s) => s.resetCustomSounds);
   const { resetAppearance } = useAppearance();
   const [confirmingReset, setConfirmingReset] = useState(false);
 
   const handleResetAll = () => {
     resetSettings();
     resetPomodoro();
+    resetCustomSounds();
     resetAppearance();
     setConfirmingReset(false);
     musicPlayer.setVolume(DEFAULT_SETTINGS.musicVolume);
@@ -38,7 +38,7 @@ export function GeneralSettings() {
       <header className="flex flex-col gap-1">
         <h2 className="font-heading text-base font-medium">General</h2>
         <p className="text-sm text-muted-foreground">
-          Configure timer defaults, sound and application preferences.
+          Configure timer defaults and application preferences.
         </p>
       </header>
 
@@ -82,44 +82,6 @@ export function GeneralSettings() {
         {settings.defaultMode === "pomodoro" && (
           <PomodoroSettings config={pomodoroConfig} onChange={updatePomodoro} />
         )}
-      </section>
-
-      <Separator />
-
-      <section className="flex flex-col gap-4">
-        <h3 className="font-heading text-sm font-medium">Sound</h3>
-
-        <Field>
-          <FieldLabel>Default volume</FieldLabel>
-          <div className="flex flex-row items-center gap-3">
-            <Volume2Icon className="size-4 shrink-0 text-muted-foreground" />
-            <Slider
-              aria-label="Default music volume"
-              className="w-full"
-              min={0}
-              max={1}
-              step={0.01}
-              value={[settings.musicVolume]}
-              onValueChange={(value) => {
-                const volume = value[0] ?? 0;
-                update({ musicVolume: volume });
-                musicPlayer.setVolume(volume);
-              }}
-            />
-            <span className="w-9 shrink-0 text-right text-xs text-muted-foreground">
-              {Math.round(settings.musicVolume * 100)}%
-            </span>
-          </div>
-        </Field>
-
-        <Field orientation="horizontal">
-          <FieldLabel>Remember last environment</FieldLabel>
-          <Switch
-            aria-label="Remember last environment"
-            checked={settings.rememberLastEnvironment}
-            onCheckedChange={(checked) => update({ rememberLastEnvironment: checked })}
-          />
-        </Field>
       </section>
 
       <Separator />

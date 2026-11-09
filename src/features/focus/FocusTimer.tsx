@@ -4,8 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { PauseIcon, PlayIcon, SquareIcon } from "lucide-react";
 import type { FocusSession } from "@/types/focus";
 import { useFocusStore } from "@/store/focusStore";
+import { useSettingsStore } from "@/store/settingsStore";
 import { useFocusTimer } from "@/hooks/useFocusTimer";
 import { notifyTargetReached } from "@/lib/notifications";
+import { playCompletionSound } from "@/lib/audio/completionSound";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
 import { TimerDisplay } from "@/features/focus/TimerDisplay";
@@ -43,6 +45,7 @@ function StandardFocusTimer({ onComplete }: FocusTimerProps) {
   const resume = useFocusStore((s) => s.resume);
   const enterOvertime = useFocusStore((s) => s.enterOvertime);
   const complete = useFocusStore((s) => s.complete);
+  const completionSoundId = useSettingsStore((s) => s.settings.completionSoundId);
 
   const { status, elapsedSec } = useFocusTimer();
 
@@ -60,7 +63,8 @@ function StandardFocusTimer({ onComplete }: FocusTimerProps) {
     if (notifiedFor.current === session.id) return;
     notifiedFor.current = session.id;
     notifyTargetReached(session.targetDuration ?? 0, session.completionMessage);
-  }, [status, session]);
+    playCompletionSound(completionSoundId);
+  }, [status, session, completionSoundId]);
 
   /* Keyboard: Space / K toggles pause-resume when nothing is open. */
   const modalOpen = showEndConfirm || showRestore;
@@ -89,6 +93,7 @@ function StandardFocusTimer({ onComplete }: FocusTimerProps) {
 
   const handleEndSession = () => {
     setShowEndConfirm(false);
+    // Ending on purpose is silent; only reaching the target chimes.
     const record = complete();
     if (record) {
       onComplete?.(record);

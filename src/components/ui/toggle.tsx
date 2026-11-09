@@ -13,6 +13,10 @@ const toggleVariants = cva(
       variant: {
         default: "bg-transparent",
         outline: "border border-input bg-transparent hover:bg-muted",
+        // Strong selected state for standalone toggles (e.g. sound assignment
+        // chips): --accent equals --muted in this theme, so it reads as flat.
+        solid:
+          "text-muted-foreground aria-pressed:bg-primary aria-pressed:text-primary-foreground data-[state=on]:bg-primary data-[state=on]:text-primary-foreground",
       },
       size: {
         default:

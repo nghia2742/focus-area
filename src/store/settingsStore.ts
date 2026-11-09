@@ -30,6 +30,11 @@ export const useSettingsStore = create<SettingsState>()(
       name: "focus-settings",
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ settings: state.settings }),
+      merge: (persisted, current) => {
+        const saved = (persisted as { settings?: Partial<AppSettings> } | undefined)
+          ?.settings;
+        return { ...current, settings: { ...DEFAULT_SETTINGS, ...saved } };
+      },
       onRehydrateStorage: () => (state) => {
         if (state) state.hydrated = true;
       },

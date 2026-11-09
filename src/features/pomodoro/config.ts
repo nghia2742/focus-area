@@ -1,3 +1,4 @@
+import { DEFAULT_COMPLETION_SOUND_ID, isCompletionSoundId } from "../../data/sounds.ts";
 import type { PomodoroConfig, PomodoroPhase } from "./types";
 
 export const DEFAULTS: PomodoroConfig = {
@@ -8,6 +9,8 @@ export const DEFAULTS: PomodoroConfig = {
   totalRounds: 4,
   autoStartBreak: true,
   autoStartFocus: false,
+  breakSoundId: DEFAULT_COMPLETION_SOUND_ID,
+  endSoundId: DEFAULT_COMPLETION_SOUND_ID,
 };
 
 export const LIMITS = {
@@ -72,5 +75,11 @@ export function clampConfig(input: Partial<PomodoroConfig> = {}): PomodoroConfig
     ),
     autoStartBreak: input.autoStartBreak ?? DEFAULTS.autoStartBreak,
     autoStartFocus: input.autoStartFocus ?? DEFAULTS.autoStartFocus,
+    breakSoundId: isCompletionSoundId(input.breakSoundId)
+      ? input.breakSoundId
+      : DEFAULTS.breakSoundId,
+    endSoundId: isCompletionSoundId(input.endSoundId)
+      ? input.endSoundId
+      : DEFAULTS.endSoundId,
   };
 }
