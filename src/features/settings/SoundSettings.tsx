@@ -4,7 +4,7 @@ import { Volume2Icon } from "lucide-react";
 import { useSettingsStore } from "@/store/settingsStore";
 import { musicPlayer } from "@/lib/audio/musicPlayer";
 import { usePomodoroConfigStore } from "@/features/pomodoro/store";
-import { Field, FieldLabel } from "@/components/ui/field";
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { SoundList, type SoundAssignment } from "./SoundList";
@@ -52,7 +52,7 @@ export function SoundSettings() {
           <div className="flex flex-row items-center gap-3">
             <Volume2Icon className="size-4 shrink-0 text-muted-foreground" />
             <Slider
-              aria-label="Default music volume"
+              aria-label="Default volume"
               className="w-full"
               min={0}
               max={1}
@@ -68,6 +68,9 @@ export function SoundSettings() {
               {Math.round(settings.musicVolume * 100)}%
             </span>
           </div>
+          <FieldDescription>
+            Used for music playback and the notification sounds below.
+          </FieldDescription>
         </Field>
       </section>
 

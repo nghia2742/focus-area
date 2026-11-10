@@ -27,9 +27,26 @@ export function SiteHeader() {
   const zenMode = useSettingsStore((s) => s.zenMode);
   const setZenMode = useSettingsStore((s) => s.setZenMode);
 
-  useHotkey("h", () => setHistoryOpen(true));
-  useHotkey("s", () => setSettingsOpen(true));
-  useHotkey("z", () => setZenMode(!zenMode));
+  // Global chrome shortcuts stay alive while an overlay is open (the fade and
+  // the "Welcome back." dialog both sit in front of the running session), and
+  // S / H swap the two dialogs instead of stacking them.
+  useHotkey(
+    "h",
+    () => {
+      setSettingsOpen(false);
+      setHistoryOpen(true);
+    },
+    { allowInOverlay: true },
+  );
+  useHotkey(
+    "s",
+    () => {
+      setHistoryOpen(false);
+      setSettingsOpen(true);
+    },
+    { allowInOverlay: true },
+  );
+  useHotkey("z", () => setZenMode(!zenMode), { allowInOverlay: true });
 
   return (
     <header className="absolute inset-x-0 top-0 z-40 flex items-center justify-between px-4 py-3 sm:px-6">
