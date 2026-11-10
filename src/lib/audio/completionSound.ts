@@ -1,7 +1,11 @@
 import { DEFAULT_COMPLETION_SOUND_ID, getCompletionSound } from "@/data/sounds";
+import { useSettingsStore } from "@/store/settingsStore";
 import { useSoundStore } from "@/store/soundStore";
 
-const CHIME_VOLUME = 0.6;
+/** Chimes follow the Sound tab's default volume, so the slider adjusts them. */
+function chimeVolume(): number {
+  return useSettingsStore.getState().settings.musicVolume;
+}
 
 /**
  * One shared element for every chime: browsers that gate playback on a user
@@ -37,7 +41,7 @@ export function playCompletionSound(soundId = DEFAULT_COMPLETION_SOUND_ID): void
   const el = getChime();
   if (!url || !el) return;
   el.src = url;
-  el.volume = CHIME_VOLUME;
+  el.volume = chimeVolume();
   void el.play().catch(() => {});
 }
 
@@ -60,7 +64,7 @@ export async function unlockCompletionSound(
     await el.play();
     el.pause();
     el.currentTime = 0;
-    el.volume = CHIME_VOLUME;
+    el.volume = chimeVolume();
     soundBlocked = false;
   } catch (error) {
     soundBlocked = (error as DOMException)?.name === "NotAllowedError";
